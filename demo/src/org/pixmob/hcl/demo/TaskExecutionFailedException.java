@@ -15,23 +15,19 @@
  */
 package org.pixmob.hcl.demo;
 
-import android.os.Bundle;
-
-import com.actionbarsherlock.app.SherlockFragmentActivity;
-
 /**
- * Application main activity.
+ * This error is thrown when a task failed to execute.
  * @author Pixmob
  */
-public class Demo extends SherlockFragmentActivity {
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        
-        if (getSupportFragmentManager().findFragmentById(android.R.id.content) == null) {
-            final TaskListFragment list = new TaskListFragment();
-            getSupportFragmentManager().beginTransaction()
-                    .add(android.R.id.content, list).commit();
-        }
+public class TaskExecutionFailedException extends Exception {
+    private static final long serialVersionUID = 1L;
+    
+    public TaskExecutionFailedException(final String message,
+            final Throwable cause) {
+        super(message, cause);
+    }
+    
+    public TaskExecutionFailedException(final String message) {
+        this(message, null);
     }
 }

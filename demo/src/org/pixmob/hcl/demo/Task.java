@@ -15,23 +15,30 @@
  */
 package org.pixmob.hcl.demo;
 
-import android.os.Bundle;
-
-import com.actionbarsherlock.app.SherlockFragmentActivity;
-
 /**
- * Application main activity.
+ * Base class for task.
  * @author Pixmob
  */
-public class Demo extends SherlockFragmentActivity {
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        
-        if (getSupportFragmentManager().findFragmentById(android.R.id.content) == null) {
-            final TaskListFragment list = new TaskListFragment();
-            getSupportFragmentManager().beginTransaction()
-                    .add(android.R.id.content, list).commit();
+public abstract class Task {
+    private final int name;
+    
+    public Task(final int name) {
+        this.name = name;
+    }
+    
+    public int getName() {
+        return name;
+    }
+    
+    public final void run() throws TaskExecutionFailedException {
+        try {
+            doRun();
+        } catch (TaskExecutionFailedException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new TaskExecutionFailedException("Task execution failed", e);
         }
     }
+    
+    protected abstract void doRun() throws Exception;
 }
