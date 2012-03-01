@@ -34,6 +34,7 @@ public class HttpResponseHandler {
      * The request failed to connect or read data in time.
      */
     public void onTimeout() throws HttpClientException {
+        throw new HttpClientException("Timeout");
     }
     
     /**
