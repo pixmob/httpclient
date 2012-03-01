@@ -49,8 +49,22 @@ public final class HttpResponse {
             return null;
         }
         
-        final int i = contentType.indexOf(";");
+        final int i = contentType.indexOf(';');
         return i == -1 ? contentType : contentType.substring(0, i).trim();
+    }
+    
+    /**
+     * Get the content encoding for this response, or <code>null</code> if
+     * unknown.
+     */
+    public String getContentEncoding() {
+        final String contentType = getFirstHeaderValue("Content-Type");
+        final int i = contentType == null ? -1 : contentType.indexOf('=');
+        if (i == -1) {
+            return getFirstHeaderValue("Content-Encoding");
+        }
+        
+        return contentType.substring(i + 1).trim();
     }
     
     /**

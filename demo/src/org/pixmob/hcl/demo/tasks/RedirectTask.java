@@ -49,7 +49,11 @@ public class RedirectTask extends Task {
                                     "Expected content type text/html, got "
                                             + response.getContentType());
                         }
-                        
+                        if (!"UTF-8".equals(response.getContentEncoding())) {
+                            throw new TaskExecutionFailedException(
+                                    "Expected content encoding UTF-8, got "
+                                            + response.getContentEncoding());
+                        }
                         if (!"http://www.google.fr/".equals(response
                                 .getFirstHeaderValue("Location"))) {
                             throw new TaskExecutionFailedException(
