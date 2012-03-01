@@ -57,6 +57,7 @@ public class TaskListFragment extends SherlockListFragment implements
     private TaskContext[] taskContexts = new TaskContext[0];
     private TaskContextAdapter taskContextAdapter;
     private MenuItem startMenuItem;
+    private boolean abortDemo;
     
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
@@ -71,6 +72,16 @@ public class TaskListFragment extends SherlockListFragment implements
         setListAdapter(taskContextAdapter);
         
         setHasOptionsMenu(true);
+        
+        if (savedInstanceState != null) {
+            abortDemo = savedInstanceState.getBoolean("abortDemo");
+        }
+    }
+    
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putBoolean("abortDemo", abortDemo);
     }
     
     @Override
@@ -92,12 +103,16 @@ public class TaskListFragment extends SherlockListFragment implements
         
         startMenuItem = menu.add(Menu.NONE, R.string.menu_start_demo,
             Menu.NONE, R.string.menu_start_demo);
-        startMenuItem.setIcon(R.drawable.ic_menu_play_clip).setShowAsAction(
-            MenuItem.SHOW_AS_ACTION_IF_ROOM);
+        startMenuItem.setIcon(R.drawable.ic_menu_play_clip)
+                .setShowAsAction(
+                    MenuItem.SHOW_AS_ACTION_IF_ROOM
+                            | MenuItem.SHOW_AS_ACTION_WITH_TEXT);
         
         menu.add(Menu.NONE, R.string.menu_help, Menu.NONE, R.string.menu_help)
                 .setIcon(R.drawable.ic_menu_help)
-                .setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
+                .setShowAsAction(
+                    MenuItem.SHOW_AS_ACTION_IF_ROOM
+                            | MenuItem.SHOW_AS_ACTION_WITH_TEXT);
     }
     
     @Override
@@ -116,8 +131,14 @@ public class TaskListFragment extends SherlockListFragment implements
     }
     
     private void onMenuStart() {
-        startMenuItem.setVisible(false);
-        getLoaderManager().restartLoader(0, null, this);
+        if (getLoaderManager().hasRunningLoaders()) {
+            abortDemo = true;
+        } else {
+            abortDemo = false;
+            startMenuItem.setTitle(R.string.menu_stop_demo);
+            startMenuItem.setIcon(R.drawable.ic_menu_stop);
+            getLoaderManager().restartLoader(0, null, this);
+        }
     }
     
     private void onMenuHelp() {
@@ -141,10 +162,11 @@ public class TaskListFragment extends SherlockListFragment implements
         taskContextAdapter.notifyDataSetChanged();
         
         final int nextId = loader.getId() + 1;
-        if (nextId != taskContexts.length) {
+        if (!abortDemo && nextId != taskContexts.length) {
             getLoaderManager().restartLoader(nextId, null, this);
         } else {
-            startMenuItem.setVisible(true);
+            startMenuItem.setTitle(R.string.menu_start_demo);
+            startMenuItem.setIcon(R.drawable.ic_menu_play_clip);
         }
     }
     

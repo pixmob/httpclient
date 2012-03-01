@@ -3,6 +3,7 @@
 
     <string name="app_name">HCL Demo</string>
     <string name="menu_start_demo">Start demo</string>
+    <string name="menu_stop_demo">Stop demo</string>
     <string name="menu_help">Help</string>
     <string name="dummy_task">Dummy Task</string>
     <string name="task_download_file">Download File</string>
