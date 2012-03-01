@@ -252,6 +252,9 @@ public final class HttpRequestBuilder {
             if (statusCodeExpected > 0 && statusCodeExpected != statusCode) {
                 throw new HttpClientException("Expected status code "
                         + statusCodeExpected + ", got " + statusCode);
+            } else if (statusCodeExpected == 0 && statusCode / 100 != 2) {
+                throw new HttpClientException("Expected status code 2xx, got "
+                        + statusCode);
             }
             
             final Map<String, List<String>> headerFields = conn
