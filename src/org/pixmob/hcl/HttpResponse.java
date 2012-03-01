@@ -44,11 +44,13 @@ public final class HttpResponse {
      * Get the content type for this response, or <code>null</code> if unknown.
      */
     public String getContentType() {
-        final List<String> contentTypes = headers.get("Content-Type");
-        if (contentTypes == null || contentTypes.isEmpty()) {
+        final String contentType = getFirstHeaderValue("Content-Type");
+        if (contentType == null) {
             return null;
         }
-        return contentTypes.get(0);
+        
+        final int i = contentType.indexOf(";");
+        return i == -1 ? contentType : contentType.substring(0, i).trim();
     }
     
     /**
@@ -70,6 +72,17 @@ public final class HttpResponse {
      */
     public Map<String, List<String>> getHeaders() {
         return headers;
+    }
+    
+    /**
+     * Get the first header value, or <code>null</code> if unset.
+     */
+    public String getFirstHeaderValue(String name) {
+        final List<String> values = headers.get(name);
+        if (values == null || values.isEmpty()) {
+            return null;
+        }
+        return values.get(0);
     }
     
     /**

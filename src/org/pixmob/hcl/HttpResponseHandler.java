@@ -33,13 +33,13 @@ public class HttpResponseHandler {
     /**
      * The request failed to connect or read data in time.
      */
-    public void onTimeout() throws HttpClientException {
+    public void onTimeout() throws Exception {
         throw new HttpClientException("Timeout");
     }
     
     /**
      * The request was successfully sent and a response is available.
      */
-    public void onResponse(HttpResponse response) throws HttpClientException {
+    public void onResponse(HttpResponse response) throws Exception {
     }
 }
