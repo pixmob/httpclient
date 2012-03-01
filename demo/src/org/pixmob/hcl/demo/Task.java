@@ -31,7 +31,7 @@ public abstract class Task {
     public Task(final Context context, final int name) {
         this.context = context;
         this.name = context.getString(name);
-        this.sourceCodeUrl = "https://raw.github.com/pixmob/hcl/master/src"
+        this.sourceCodeUrl = "https://raw.github.com/pixmob/hcl/master/demo/src/"
                 + getClass().getName().replace('.', '/') + ".java";
     }
     
