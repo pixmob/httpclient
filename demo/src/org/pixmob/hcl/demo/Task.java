@@ -15,19 +15,43 @@
  */
 package org.pixmob.hcl.demo;
 
+import org.pixmob.hcl.HttpClient;
+
+import android.content.Context;
+
 /**
  * Base class for task.
  * @author Pixmob
  */
 public abstract class Task {
-    private final int name;
+    private final Context context;
+    private final String name;
+    private final String sourceCodeUrl;
     
-    public Task(final int name) {
-        this.name = name;
+    public Task(final Context context, final int name) {
+        this.context = context;
+        this.name = context.getString(name);
+        this.sourceCodeUrl = "https://raw.github.com/pixmob/hcl/master/src"
+                + getClass().getName().replace('.', '/') + ".java";
     }
     
-    public int getName() {
+    protected HttpClient createClient() {
+        final HttpClient hc = new HttpClient(context);
+        hc.setConnectTimeout(4000);
+        hc.setReadTimeout(8000);
+        return hc;
+    }
+    
+    public Context getContext() {
+        return context;
+    }
+    
+    public String getName() {
         return name;
+    }
+    
+    public String getSourceCodeUrl() {
+        return sourceCodeUrl;
     }
     
     public final void run() throws TaskExecutionFailedException {

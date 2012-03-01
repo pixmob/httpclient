@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <color name="task_color_running">#fe7c34</color>
+    <color name="task_color_finished">#9ACD3F</color>
+    <color name="task_color_failed">#fe343b</color>
+    <color name="task_color_runnable">#FFF</color>
+
+</resources>
