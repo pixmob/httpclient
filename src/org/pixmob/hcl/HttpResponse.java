@@ -17,8 +17,11 @@ package org.pixmob.hcl;
 
 import java.io.InputStream;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import android.os.Build;
 
 /**
  * When the Http server receives a request from a client, the Http response is
@@ -32,12 +35,39 @@ public final class HttpResponse {
     private final Map<String, List<String>> headers;
     
     HttpResponse(final int statusCode, final InputStream payload,
-            final Map<String, List<String>> headers,
+            final Map<String, List<String>> rawHeaders,
             final Map<String, String> cookies) {
         this.statusCode = statusCode;
         this.payload = payload;
-        this.headers = Collections.unmodifiableMap(headers);
         this.cookies = Collections.unmodifiableMap(cookies);
+        
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.GINGERBREAD) {
+            // Before Gingerbread, Android has a bug where all headers are
+            // stored in lower-case:
+            // http://code.google.com/p/android/issues/detail?id=6684
+            final Map<String, List<String>> newHeaders = new HashMap<String, List<String>>(
+                    rawHeaders.size());
+            for (final Map.Entry<String, List<String>> e : rawHeaders
+                    .entrySet()) {
+                final String key = e.getKey();
+                final int keyLen = key.length();
+                final StringBuilder newKey = new StringBuilder(keyLen);
+                for (int i = 0; i < keyLen; ++i) {
+                    final char c = key.charAt(i);
+                    final char c2;
+                    if (i == 0 || key.charAt(i - 1) == '-') {
+                        c2 = Character.toUpperCase(c);
+                    } else {
+                        c2 = c;
+                    }
+                    newKey.append(c2);
+                }
+                newHeaders.put(newKey.toString(), e.getValue());
+            }
+            this.headers = Collections.unmodifiableMap(newHeaders);
+        } else {
+            this.headers = Collections.unmodifiableMap(rawHeaders);
+        }
     }
     
     /**
@@ -54,16 +84,15 @@ public final class HttpResponse {
     }
     
     /**
-     * Get the content encoding for this response, or <code>null</code> if
-     * unknown.
+     * Get the charset for this response, or <code>null</code> if unknown.
      */
-    public String getContentEncoding() {
+    public String getContentCharset() {
         final String contentType = getFirstHeaderValue("Content-Type");
-        final int i = contentType == null ? -1 : contentType.indexOf('=');
-        if (i == -1) {
-            return getFirstHeaderValue("Content-Encoding");
+        if (contentType == null) {
+            return null;
         }
         
+        final int i = contentType.indexOf('=');
         return contentType.substring(i + 1).trim();
     }
     

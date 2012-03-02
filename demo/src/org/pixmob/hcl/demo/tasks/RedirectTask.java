@@ -38,7 +38,7 @@ public class RedirectTask extends Task {
     @Override
     protected void doRun() throws Exception {
         final HttpClient hc = createClient();
-        hc.get("http://google.fr")
+        hc.get("http://google.com")
                 .expectStatusCode(HttpURLConnection.HTTP_MOVED_PERM)
                 .setHandler(new HttpResponseHandler() {
                     @Override
@@ -49,17 +49,10 @@ public class RedirectTask extends Task {
                                     "Expected content type text/html, got "
                                             + response.getContentType());
                         }
-                        if (!"UTF-8".equals(response.getContentEncoding())) {
+                        if (!"UTF-8".equals(response.getContentCharset())) {
                             throw new TaskExecutionFailedException(
-                                    "Expected content encoding UTF-8, got "
-                                            + response.getContentEncoding());
-                        }
-                        if (!"http://www.google.fr/".equals(response
-                                .getFirstHeaderValue("Location"))) {
-                            throw new TaskExecutionFailedException(
-                                    "Expected Location header set to www.google.fr/, got "
-                                            + response
-                                                    .getFirstHeaderValue("Location"));
+                                    "Expected content charset UTF-8, got "
+                                            + response.getContentCharset());
                         }
                     }
                 }).execute();
