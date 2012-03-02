@@ -30,6 +30,10 @@ final class Constants {
      */
     public static final String HTTP_GET = "GET";
     /**
+     * <code>HEAD</code> Http method.
+     */
+    public static final String HTTP_HEAD = "HEAD";
+    /**
      * <code>POST</code> Http method.
      */
     public static final String HTTP_POST = "POST";

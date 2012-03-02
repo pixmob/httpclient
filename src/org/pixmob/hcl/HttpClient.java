@@ -16,6 +16,7 @@
 package org.pixmob.hcl;
 
 import static org.pixmob.hcl.Constants.HTTP_GET;
+import static org.pixmob.hcl.Constants.HTTP_HEAD;
 import static org.pixmob.hcl.Constants.HTTP_POST;
 
 import java.util.HashMap;
@@ -69,6 +70,16 @@ public final class HttpClient {
             throw new IllegalArgumentException("URI cannot be null");
         }
         return new HttpRequestBuilder(this, uri, HTTP_GET);
+    }
+    
+    /**
+     * Prepare a new request with the request method <code>HEAD</code>.
+     */
+    public HttpRequestBuilder head(String uri) {
+        if (uri == null) {
+            throw new IllegalArgumentException("URI cannot be null");
+        }
+        return new HttpRequestBuilder(this, uri, HTTP_HEAD);
     }
     
     /**
