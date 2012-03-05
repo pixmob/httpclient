@@ -37,6 +37,14 @@ final class Constants {
      * <code>POST</code> Http method.
      */
     public static final String HTTP_POST = "POST";
+    /**
+     * <code>PUT</code> Http method.
+     */
+    public static final String HTTP_PUT = "PUT";
+    /**
+     * <code>DELETE</code> Http method.
+     */
+    public static final String HTTP_DELETE = "DELETE";
     
     private Constants() {
     }

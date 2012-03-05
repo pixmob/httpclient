@@ -15,9 +15,11 @@
  */
 package org.pixmob.hcl;
 
+import static org.pixmob.hcl.Constants.HTTP_DELETE;
 import static org.pixmob.hcl.Constants.HTTP_GET;
 import static org.pixmob.hcl.Constants.HTTP_HEAD;
 import static org.pixmob.hcl.Constants.HTTP_POST;
+import static org.pixmob.hcl.Constants.HTTP_PUT;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -90,6 +92,26 @@ public final class HttpClient {
             throw new IllegalArgumentException("URI cannot be null");
         }
         return new HttpRequestBuilder(this, uri, HTTP_POST);
+    }
+    
+    /**
+     * Prepare a new request with the request method <code>PUT</code>.
+     */
+    public HttpRequestBuilder put(String uri) {
+        if (uri == null) {
+            throw new IllegalArgumentException("URI cannot be null");
+        }
+        return new HttpRequestBuilder(this, uri, HTTP_PUT);
+    }
+    
+    /**
+     * Prepare a new request with the request method <code>DELETE</code>.
+     */
+    public HttpRequestBuilder delete(String uri) {
+        if (uri == null) {
+            throw new IllegalArgumentException("URI cannot be null");
+        }
+        return new HttpRequestBuilder(this, uri, HTTP_DELETE);
     }
     
     /**
