@@ -1,6 +1,7 @@
 package com.actionbarsherlock.app;
 
 import android.content.res.Configuration;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
@@ -20,13 +21,14 @@ import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
 
 public abstract class SherlockFragmentActivity extends FragmentActivity implements OnCreatePanelMenuListener, OnPreparePanelListener, OnMenuItemSelectedListener, OnActionModeStartedListener, OnActionModeFinishedListener {
-    static final boolean DEBUG = false;
+    static final boolean DEBUG = true;
     private static final String TAG = "SherlockFragmentActivity";
 
     private ActionBarSherlock mSherlock;
     private boolean mIgnoreNativeCreate = false;
     private boolean mIgnoreNativePrepare = false;
     private boolean mIgnoreNativeSelected = false;
+    private Boolean mOverrideNativeCreate = null;
 
     protected final ActionBarSherlock getSherlock() {
         if (mSherlock == null) {
@@ -157,7 +159,7 @@ public abstract class SherlockFragmentActivity extends FragmentActivity implemen
 
     @Override
     public final boolean onCreateOptionsMenu(android.view.Menu menu) {
-        return true;
+        return (mOverrideNativeCreate != null) ? mOverrideNativeCreate.booleanValue() : true;
     }
 
     @Override
@@ -221,12 +223,22 @@ public abstract class SherlockFragmentActivity extends FragmentActivity implemen
 
     @Override
     public boolean onCreatePanelMenu(int featureId, Menu menu) {
+        if (DEBUG) Log.d(TAG, "[onCreatePanelMenu] featureId: " + featureId + ", menu: " + menu);
+
         if (featureId == Window.FEATURE_OPTIONS_PANEL) {
             boolean result = onCreateOptionsMenu(menu);
 
             //Dispatch to parent panel creation for fragment dispatching
             if (DEBUG) Log.d(TAG, "[onCreatePanelMenu] dispatching to native with mule");
-            result |= super.onCreatePanelMenu(featureId, new MenuMule(menu));
+            mOverrideNativeCreate = result;
+            boolean fragResult = super.onCreatePanelMenu(featureId, new MenuMule(menu));
+            mOverrideNativeCreate = null;
+
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB) {
+                result |= menu.hasVisibleItems();
+            } else {
+                result |= fragResult;
+            }
 
             return result;
         }
@@ -239,6 +251,8 @@ public abstract class SherlockFragmentActivity extends FragmentActivity implemen
 
     @Override
     public boolean onPreparePanel(int featureId, View view, Menu menu) {
+        if (DEBUG) Log.d(TAG, "[onPreparePanel] featureId: " + featureId + ", view: " + view + " menu: " + menu);
+
         if (featureId == Window.FEATURE_OPTIONS_PANEL) {
             boolean result = onPrepareOptionsMenu(menu);
 
@@ -257,6 +271,8 @@ public abstract class SherlockFragmentActivity extends FragmentActivity implemen
 
     @Override
     public boolean onMenuItemSelected(int featureId, MenuItem item) {
+        if (DEBUG) Log.d(TAG, "[onMenuItemSelected] featureId: " + featureId + ", item: " + item);
+
         if (featureId == Window.FEATURE_OPTIONS_PANEL) {
             boolean result = onOptionsItemSelected(item);
 

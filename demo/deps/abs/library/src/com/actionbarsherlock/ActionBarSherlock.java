@@ -57,17 +57,6 @@ public abstract class ActionBarSherlock {
     /**
      * <p>Denotes an implementation of ActionBarSherlock which provides an
      * action bar-enhanced experience.</p>
-     *
-     * <p>The value provided to this annotation should be a
-     * <a href="http://developer.android.com/guide/topics/resources/providing-resources.html#AlternativeResources">
-     * configuration qualifier</a> with no resource name prefix (e.g., "v7-desk"
-     * would provide an implementation on 2.1+ when docked).</p>
-     *
-     * <p>Valid qualifiers, in order of precedence, are:</p>
-     * <ol>
-     *   <li>Screen pixel density (only "tvdpi" supported)</li>
-     *   <li>Platform version level (e.g., "v7", "v14")</li>
-     * </ol>
      */
     @Target(ElementType.TYPE)
     @Retention(RetentionPolicy.RUNTIME)
@@ -235,6 +224,7 @@ public abstract class ActionBarSherlock {
             throw new IllegalStateException("No implementations match configuration.");
         }
         Class<? extends ActionBarSherlock> impl = impls.values().iterator().next();
+        if (DEBUG) Log.i(TAG, "Using implementation: " + impl.getSimpleName());
 
         try {
             Constructor<? extends ActionBarSherlock> ctor = impl.getConstructor(CONSTRUCTOR_ARGS);
