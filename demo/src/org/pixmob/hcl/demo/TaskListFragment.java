@@ -55,14 +55,15 @@ import com.actionbarsherlock.view.MenuItem;
  */
 public class TaskListFragment extends SherlockListFragment implements
         LoaderCallbacks<TaskContext> {
-    private TaskContext[] taskContexts = new TaskContext[0];
+    private TaskContext[] taskContexts;
     private TaskContextAdapter taskContextAdapter;
     private MenuItem startMenuItem;
-    private boolean abortDemo;
+    private volatile boolean abortDemo;
     
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+        setHasOptionsMenu(true);
         
         final Context context = getActivity().getApplicationContext();
         taskContexts = new TaskContext[] {
@@ -73,10 +74,16 @@ public class TaskListFragment extends SherlockListFragment implements
         taskContextAdapter = new TaskContextAdapter(getActivity(), taskContexts);
         setListAdapter(taskContextAdapter);
         
-        setHasOptionsMenu(true);
-        
         if (savedInstanceState != null) {
-            abortDemo = savedInstanceState.getBoolean("abortDemo");
+            final TaskState[] states = (TaskState[]) savedInstanceState
+                    .getSerializable("taskStates");
+            for (int i = 0; i < states.length; ++i) {
+                taskContexts[i].state = states[i];
+                
+                if (TaskState.RUNNING.equals(states[i])) {
+                    getLoaderManager().restartLoader(i, null, this);
+                }
+            }
         }
     }
     
@@ -84,6 +91,12 @@ public class TaskListFragment extends SherlockListFragment implements
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putBoolean("abortDemo", abortDemo);
+        
+        final TaskState[] states = new TaskState[taskContexts.length];
+        for (int i = 0; i < taskContexts.length; ++i) {
+            states[i] = taskContexts[i].state;
+        }
+        outState.putSerializable("taskStates", states);
     }
     
     @Override
@@ -99,6 +112,18 @@ public class TaskListFragment extends SherlockListFragment implements
         }
     }
     
+    /**
+     * Check if any task is running.
+     */
+    private boolean isDemoRunning() {
+        for (final TaskContext taskContext : taskContexts) {
+            if (TaskState.RUNNING.equals(taskContext.state)) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
@@ -109,6 +134,11 @@ public class TaskListFragment extends SherlockListFragment implements
                 .setShowAsAction(
                     MenuItem.SHOW_AS_ACTION_IF_ROOM
                             | MenuItem.SHOW_AS_ACTION_WITH_TEXT);
+        
+        if (isDemoRunning()) {
+            startMenuItem.setTitle(R.string.menu_stop_demo);
+            startMenuItem.setIcon(R.drawable.ic_menu_stop);
+        }
         
         menu.add(Menu.NONE, R.string.menu_help, Menu.NONE, R.string.menu_help)
                 .setIcon(R.drawable.ic_menu_help)
@@ -139,6 +169,11 @@ public class TaskListFragment extends SherlockListFragment implements
             abortDemo = false;
             startMenuItem.setTitle(R.string.menu_stop_demo);
             startMenuItem.setIcon(R.drawable.ic_menu_stop);
+            
+            for (final TaskContext taskContext : taskContexts) {
+                taskContext.state = TaskState.RUNNABLE;
+            }
+            
             getLoaderManager().restartLoader(0, null, this);
         }
     }
@@ -167,6 +202,7 @@ public class TaskListFragment extends SherlockListFragment implements
         if (!abortDemo && nextId != taskContexts.length) {
             getLoaderManager().restartLoader(nextId, null, this);
         } else {
+            abortDemo = false;
             startMenuItem.setTitle(R.string.menu_start_demo);
             startMenuItem.setIcon(R.drawable.ic_menu_play_clip);
         }
@@ -270,7 +306,7 @@ public class TaskListFragment extends SherlockListFragment implements
      */
     public static class TaskContext {
         public final Task task;
-        public TaskState state = TaskState.RUNNABLE;
+        public volatile TaskState state = TaskState.RUNNABLE;
         
         public TaskContext(final Task task) {
             this.task = task;
