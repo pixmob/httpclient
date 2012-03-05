@@ -181,6 +181,7 @@ public class TaskListFragment extends SherlockListFragment implements
     }
     
     private void onMenuHelp() {
+        new HelpDialogFragment().show(getFragmentManager(), "help");
     }
     
     @Override
