@@ -23,6 +23,7 @@ import java.util.Map;
 import org.pixmob.hcl.demo.TaskListFragment.TaskContext;
 import org.pixmob.hcl.demo.tasks.ContentTypeTask;
 import org.pixmob.hcl.demo.tasks.DownloadFileTask;
+import org.pixmob.hcl.demo.tasks.HttpsTask;
 import org.pixmob.hcl.demo.tasks.PostFormTask;
 import org.pixmob.hcl.demo.tasks.RedirectTask;
 
@@ -70,7 +71,8 @@ public class TaskListFragment extends SherlockListFragment implements
                 new TaskContext(new DownloadFileTask(context)),
                 new TaskContext(new RedirectTask(context)),
                 new TaskContext(new PostFormTask(context)),
-                new TaskContext(new ContentTypeTask(context)), };
+                new TaskContext(new ContentTypeTask(context)),
+                new TaskContext(new HttpsTask(context)), };
         taskContextAdapter = new TaskContextAdapter(getActivity(), taskContexts);
         setListAdapter(taskContextAdapter);
         

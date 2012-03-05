@@ -10,5 +10,6 @@
     <string name="task_redirect">Redirect</string>
     <string name="task_post_form">Post Form</string>
     <string name="task_content_type">Content Type</string>
+    <string name="task_https">HTTPS</string>
 
 </resources>

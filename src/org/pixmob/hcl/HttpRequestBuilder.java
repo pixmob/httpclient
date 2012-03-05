@@ -61,6 +61,7 @@ public final class HttpRequestBuilder {
     private static final String CONTENT_CHARSET = "UTF-8";
     private static final Map<String, List<String>> NO_HEADERS = new HashMap<String, List<String>>(
             0);
+    private static TrustManager[] trustManagers;
     private final byte[] buffer = new byte[1024];
     private final HttpClient hc;
     private String uri;
@@ -363,7 +364,7 @@ public final class HttpRequestBuilder {
             final InputStream in = context.getResources().openRawResource(
                 R.raw.hcl_keystore);
             try {
-                localTrustStore.load(in, "mysecret".toCharArray());
+                localTrustStore.load(in, null);
             } finally {
                 in.close();
             }
@@ -384,21 +385,25 @@ public final class HttpRequestBuilder {
             HttpsURLConnection conn) throws IOException {
         final SSLContext sslContext;
         try {
-            // Load SSL certificates:
-            // http://nelenkov.blogspot.com/2011/12/using-custom-certificate-trust-store-on.html
-            // Earlier Android versions do not have updated root CA
-            // certificates, resulting in connection errors.
-            final KeyStore keyStore = loadCertificates(context);
-            
-            final CustomTrustManager customTrustManager = new CustomTrustManager(
-                    keyStore);
-            final TrustManager[] tms = new TrustManager[] { customTrustManager };
+            // SSL certificates are provided by the Guardian Project:
+            // https://github.com/guardianproject/cacert
+            if (trustManagers == null) {
+                // Load SSL certificates:
+                // http://nelenkov.blogspot.com/2011/12/using-custom-certificate-trust-store-on.html
+                // Earlier Android versions do not have updated root CA
+                // certificates, resulting in connection errors.
+                final KeyStore keyStore = loadCertificates(context);
+                
+                final CustomTrustManager customTrustManager = new CustomTrustManager(
+                        keyStore);
+                trustManagers = new TrustManager[] { customTrustManager };
+            }
             
             // Init SSL connection with custom certificates.
             // The same SecureRandom instance is used for every connection to
             // speed up initialization.
             sslContext = SSLContext.getInstance("TLS");
-            sslContext.init(null, tms, SECURE_RANDOM);
+            sslContext.init(null, trustManagers, SECURE_RANDOM);
         } catch (GeneralSecurityException e) {
             final IOException ioe = new IOException(
                     "Failed to initialize SSL engine");
