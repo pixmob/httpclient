@@ -34,8 +34,10 @@ import java.security.KeyStore;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.Inflater;
 import java.util.zip.InflaterInputStream;
@@ -63,7 +65,7 @@ public final class HttpRequestBuilder {
     private final HttpClient hc;
     private String uri;
     private String method;
-    private int statusCodeExpected;
+    private Set<Integer> expectedStatusCodes = new HashSet<Integer>(2);
     private Map<String, String> cookies;
     private Map<String, List<String>> headers;
     private Map<String, String> parameters;
@@ -77,12 +79,16 @@ public final class HttpRequestBuilder {
         this.method = method;
     }
     
-    public HttpRequestBuilder expectStatusCode(int statusCode) {
-        if (statusCode < 1) {
-            throw new IllegalArgumentException("Invalid status code: "
-                    + statusCode);
+    public HttpRequestBuilder expectStatusCode(int... statusCodes) {
+        if (statusCodes != null) {
+            for (final int statusCode : statusCodes) {
+                if (statusCode < 1) {
+                    throw new IllegalArgumentException("Invalid status code: "
+                            + statusCode);
+                }
+                expectedStatusCodes.add(statusCode);
+            }
         }
-        statusCodeExpected = statusCode;
         return this;
     }
     
@@ -249,10 +255,11 @@ public final class HttpRequestBuilder {
             if (statusCode == -1) {
                 throw new HttpClientException("Invalid response from " + uri);
             }
-            if (statusCodeExpected > 0 && statusCodeExpected != statusCode) {
+            if (!expectedStatusCodes.isEmpty()
+                    && !expectedStatusCodes.contains(statusCode)) {
                 throw new HttpClientException("Expected status code "
-                        + statusCodeExpected + ", got " + statusCode);
-            } else if (statusCodeExpected == 0 && statusCode / 100 != 2) {
+                        + expectedStatusCodes + ", got " + statusCode);
+            } else if (expectedStatusCodes.isEmpty() && statusCode / 100 != 2) {
                 throw new HttpClientException("Expected status code 2xx, got "
                         + statusCode);
             }
