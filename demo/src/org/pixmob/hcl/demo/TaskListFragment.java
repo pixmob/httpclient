@@ -118,9 +118,11 @@ public class TaskListFragment extends SherlockListFragment implements
      * Check if any task is running.
      */
     private boolean isDemoRunning() {
-        for (final TaskContext taskContext : taskContexts) {
-            if (TaskState.RUNNING.equals(taskContext.state)) {
-                return true;
+        if (taskContexts != null) {
+            for (final TaskContext taskContext : taskContexts) {
+                if (TaskState.RUNNING.equals(taskContext.state)) {
+                    return true;
+                }
             }
         }
         return false;
