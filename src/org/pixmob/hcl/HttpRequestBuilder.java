@@ -162,7 +162,7 @@ public final class HttpRequestBuilder {
     
     public void execute() throws HttpClientException {
         HttpURLConnection conn = null;
-        InputStream payloadStream = null;
+        UncloseableInputStream payloadStream = null;
         try {
             if (parameters != null && !parameters.isEmpty()) {
                 final StringBuilder buf = new StringBuilder(256);
@@ -281,7 +281,7 @@ public final class HttpRequestBuilder {
                 }
             }
             
-            payloadStream = getInputStream(conn);
+            payloadStream = new UncloseableInputStream(getInputStream(conn));
             if (handler != null) {
                 final HttpResponse resp = new HttpResponse(statusCode,
                         payloadStream, headerFields == null ? NO_HEADERS
@@ -315,7 +315,7 @@ public final class HttpRequestBuilder {
                     } catch (IOException ignore) {
                     }
                 }
-                IOUtils.close(payloadStream);
+                payloadStream.forceClose();
                 conn.disconnect();
             }
         }
