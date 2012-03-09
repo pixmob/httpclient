@@ -11,7 +11,7 @@
 	<parent>
 		<groupId>com.actionbarsherlock</groupId>
 		<artifactId>parent-sample</artifactId>
-		<version>4.0.0-SNAPSHOT</version>
+		<version>4.0.0</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
@@ -27,11 +27,6 @@
 			<artifactId>library</artifactId>
 			<version>${project.version}</version>
 			<type>apklib</type>
-		</dependency>
-		<dependency>
-			<groupId>com.actionbarsherlock</groupId>
-			<artifactId>plugin-support-lib</artifactId>
-			<version>${project.version}</version>
 		</dependency>
 	</dependencies>
 
@@ -86,7 +81,7 @@
 					<plugin>
 						<groupId>com.jayway.maven.plugins.android.generation2</groupId>
 						<artifactId>android-maven-plugin</artifactId>
-						<version>${android-maven-plugin}</version>
+						<version>${android-maven.version}</version>
 						<inherited>true</inherited>
 						<configuration>
 							<zipalign>
