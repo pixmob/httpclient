@@ -314,8 +314,8 @@ public final class HttpRequestBuilder {
                             ;
                     } catch (IOException ignore) {
                     }
+                    payloadStream.forceClose();
                 }
-                payloadStream.forceClose();
                 conn.disconnect();
             }
         }
