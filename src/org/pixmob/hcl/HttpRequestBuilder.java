@@ -301,6 +301,8 @@ public final class HttpRequestBuilder {
                     throw new HttpClientException("Error in response handler",
                             e2);
                 }
+            } else {
+                throw new HttpClientException("Response timeout from " + uri, e);
             }
         } catch (IOException e) {
             throw new HttpClientException("Connection failed to " + uri, e);
