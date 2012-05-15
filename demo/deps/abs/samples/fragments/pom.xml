@@ -11,7 +11,7 @@
 	<parent>
 		<groupId>com.actionbarsherlock</groupId>
 		<artifactId>parent-sample</artifactId>
-		<version>4.0.0</version>
+		<version>4.0.2</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
@@ -32,13 +32,34 @@
 
 	<build>
 		<sourceDirectory>src</sourceDirectory>
-		<finalName>${apk.prefix}-${project.artifactId}-unaligned</finalName>
+		<finalName>${apk.prefix}-${project.artifactId}-${project.version}-unaligned</finalName>
 
 		<plugins>
 			<plugin>
 				<groupId>com.jayway.maven.plugins.android.generation2</groupId>
 				<artifactId>android-maven-plugin</artifactId>
 				<extensions>true</extensions>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>zipalign</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jarsigner-plugin</artifactId>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>sign</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 
 			<plugin>
@@ -79,39 +100,16 @@
 			<build>
 				<plugins>
 					<plugin>
-						<groupId>com.jayway.maven.plugins.android.generation2</groupId>
-						<artifactId>android-maven-plugin</artifactId>
-						<version>${android-maven.version}</version>
-						<inherited>true</inherited>
-						<configuration>
-							<zipalign>
-								<inputApk>${project.build.directory}/${project.build.finalName}.apk</inputApk>
-								<outputApk>${project.build.directory}/${apk.prefix}-${project.artifactId}.apk</outputApk>
-							</zipalign>
-						</configuration>
+						<groupId>com.github.github</groupId>
+						<artifactId>downloads-maven-plugin</artifactId>
 						<executions>
 							<execution>
-								<id>alignApk</id>
-								<phase>package</phase>
+								<phase>deploy</phase>
 								<goals>
-									<goal>zipalign</goal>
+									<goal>upload</goal>
 								</goals>
 							</execution>
 						</executions>
-					</plugin>
-
-					<plugin>
-						<groupId>com.jakewharton</groupId>
-						<artifactId>github-deploy-maven-plugin</artifactId>
-						<version>1.0.1</version>
-						<configuration>
-							<types>
-								<type>aligned</type>
-							</types>
-						</configuration>
-						<goals>
-							<goal>deploy</goal>
-						</goals>
 					</plugin>
 				</plugins>
 			</build>

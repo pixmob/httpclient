@@ -1,6 +1,38 @@
 Change Log
 ===============================================================================
 
+Version 4.0.2 *(2012-04-15)*
+----------------------------
+
+ * Upgrade to r7 support library.
+ * Fix: Do not trigger menu creation after `onCreate` if activity is finishing.
+ * Fix: Prevent overflow from displaying if there are no overflow action items.
+ * Fix: Long-pressing menu key no longer triggers overflow.
+ * Fix: Use proper tab state-list drawable to mimic ICS.
+ * Fix: Ensure dispatching menu creation and preparation to fragments can
+   properly return `false` when appropriate to avoid rendering artifacts.
+ * Fix: Properly save and fetch action mode tag on ICS.
+ * Fix: Add missing density-specific resources for certain asssets and remove
+   unused assets.
+
+
+Version 4.0.1 *(2012-03-25)*
+----------------------------
+
+ * Add `ShareActionProvider` widget for use as action items.
+ * Re-add 'Styled' sample to provide a more comprehensive theming example.
+ * Fix: Do not dispatch options item selection to fragments if the activity
+   handles the callback.
+ * Fix: Prevent menu key from opening the overflow menu when an action mode is
+   currently displayed.
+ * Fix: Ensure fragment transaction instance is not `null` on initial tab
+   selection callback.
+ * Fix: Displaying an action mode while using stacked tab navigation no longer
+   throws an exception.
+ * Fix: Using expandable action item callbacks no longer results in a possible
+   exception on older devices.
+
+
 Version 4.0.0 *(2012-03-07)*
 ----------------------------
 

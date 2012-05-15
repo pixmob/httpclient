@@ -1,8 +1,5 @@
 package com.actionbarsherlock.sample.roboguice.activity;
 
-import roboguice.inject.ContentView;
-import roboguice.inject.InjectView;
-
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Vibrator;
@@ -13,11 +10,12 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
-
 import com.actionbarsherlock.sample.roboguice.R;
-import com.actionbarsherlock.sample.roboguice.RoboSherlockActivity;
 import com.actionbarsherlock.sample.roboguice.controller.AstroboyRemoteControl;
+import com.github.rtyley.android.sherlock.roboguice.activity.RoboSherlockActivity;
 import com.google.inject.Inject;
+import roboguice.inject.ContentView;
+import roboguice.inject.InjectView;
 
 
 /**

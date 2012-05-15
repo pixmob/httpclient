@@ -11,7 +11,7 @@
 	<parent>
 		<groupId>com.actionbarsherlock</groupId>
 		<artifactId>parent-sample</artifactId>
-		<version>4.0.0</version>
+		<version>4.0.2</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
@@ -21,11 +21,6 @@
 			<artifactId>android</artifactId>
 			<scope>provided</scope>
 		</dependency>
-		<dependency>
-			<groupId>com.google.android</groupId>
-			<artifactId>support-v4</artifactId>
-			<version>r6</version>
-		</dependency>
 
 		<dependency>
 			<groupId>com.actionbarsherlock</groupId>
@@ -34,16 +29,11 @@
 			<type>apklib</type>
 		</dependency>
 
+		<!-- https://github.com/rtyley/roboguice-sherlock -->
 		<dependency>
-			<groupId>com.google.inject</groupId>
-			<artifactId>guice</artifactId>
-			<version>3.0</version>
-			<classifier>no_aop</classifier>
-		</dependency>
-		<dependency>
-			<groupId>org.roboguice</groupId>
-			<artifactId>roboguice</artifactId>
-			<version>2.0b4</version>
+			<groupId>com.github.rtyley</groupId>
+			<artifactId>roboguice-sherlock</artifactId>
+			<version>1.1</version>
 		</dependency>
 	</dependencies>
 
@@ -60,13 +50,34 @@
 
 	<build>
 		<sourceDirectory>src</sourceDirectory>
-		<finalName>${apk.prefix}-${project.artifactId}-unaligned</finalName>
+		<finalName>${apk.prefix}-${project.artifactId}-${project.version}-unaligned</finalName>
 
 		<plugins>
 			<plugin>
 				<groupId>com.jayway.maven.plugins.android.generation2</groupId>
 				<artifactId>android-maven-plugin</artifactId>
 				<extensions>true</extensions>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>zipalign</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jarsigner-plugin</artifactId>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>sign</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 
 			<plugin>
@@ -107,22 +118,13 @@
 			<build>
 				<plugins>
 					<plugin>
-						<groupId>com.jayway.maven.plugins.android.generation2</groupId>
-						<artifactId>android-maven-plugin</artifactId>
-						<version>${android-maven.version}</version>
-						<inherited>true</inherited>
-						<configuration>
-							<zipalign>
-								<inputApk>${project.build.directory}/${project.build.finalName}.apk</inputApk>
-								<outputApk>${project.build.directory}/${apk.prefix}-${project.artifactId}.apk</outputApk>
-							</zipalign>
-						</configuration>
+						<groupId>com.github.github</groupId>
+						<artifactId>downloads-maven-plugin</artifactId>
 						<executions>
 							<execution>
-								<id>alignApk</id>
-								<phase>package</phase>
+								<phase>deploy</phase>
 								<goals>
-									<goal>zipalign</goal>
+									<goal>upload</goal>
 								</goals>
 							</execution>
 						</executions>

@@ -3,10 +3,16 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
+	<parent>
+		<groupId>org.sonatype.oss</groupId>
+		<artifactId>oss-parent</artifactId>
+		<version>7</version>
+	</parent>
+
 	<groupId>com.actionbarsherlock</groupId>
 	<artifactId>parent</artifactId>
 	<packaging>pom</packaging>
-	<version>4.0.0</version>
+	<version>4.0.2</version>
 
 	<name>ActionBarSherlock (Parent)</name>
 	<description>Android library for implementing the action bar design pattern using the backported sources of Ice Cream Sandwich.</description>
@@ -45,34 +51,6 @@
 		</license>
 	</licenses>
 
-	<distributionManagement>
-		<repository>
-			<id>personal-repository</id>
-			<name>JakeWharton.com Maven Repository</name>
-			<url>scp://r.jakewharton.com/home/jakewharton_repository/r.jakewharton.com/maven/release/</url>
-		</repository>
-		<snapshotRepository>
-			<id>personal-repository</id>
-			<name>JakeWharton.com Maven Repository</name>
-			<url>scp://r.jakewharton.com/home/jakewharton_repository/r.jakewharton.com/maven/snapshot/</url>
-		</snapshotRepository>
-		<site>
-			<id>github-project-site</id>
-			<name>GitHub Project Pages</name>
-			<url>gitsite:git@github.com/JakeWharton/ActionBarSherlock</url>
-			<!--
-			YOU MUST PUT THE FOLLOWING IN ~/.m2/settings.xml
-
-			<servers>
-				<server>
-					<id>github-project-site</id>
-					<username>git</username>
-				</server>
-			</servers>
-			-->
-		</site>
-	</distributionManagement>
-
 	<organization>
 		<name>Jake Wharton</name>
 		<url>http://jakewharton.com</url>
@@ -92,11 +70,14 @@
 		<java.version>1.6</java.version>
 		<android.version>4.0.1.2</android.version>
 		<android.platform>14</android.platform>
-		<android-support.version>r6</android-support.version>
+		<android-support.version>r7</android-support.version>
 
 		<android-maven.version>3.1.1</android-maven.version>
-		<robolectric.version>1.0</robolectric.version>
+		<robolectric.version>1.1</robolectric.version>
 		<junit.version>4.10</junit.version>
+
+		<github.downloads.repositoryOwner>JakeWharton</github.downloads.repositoryOwner>
+		<github.downloads.repositoryName>ActionBarSherlock</github.downloads.repositoryName>
 	</properties>
 
 	<dependencyManagement>
@@ -148,13 +129,34 @@
 					<groupId>com.jayway.maven.plugins.android.generation2</groupId>
 					<artifactId>android-maven-plugin</artifactId>
 					<version>${android-maven.version}</version>
+					<extensions>true</extensions>
 					<configuration>
 						<sdk>
 							<platform>${android.platform}</platform>
 						</sdk>
+						<sign>
+							<debug>false</debug>
+						</sign>
 						<undeployBeforeDeploy>true</undeployBeforeDeploy>
+						<zipalign>
+							<inputApk>${project.build.directory}/${project.build.finalName}.apk</inputApk>
+							<outputApk>${project.build.directory}/${apk.prefix}-${project.artifactId}-${project.version}.apk</outputApk>
+						</zipalign>
 					</configuration>
-					<extensions>true</extensions>
+				</plugin>
+
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-jarsigner-plugin</artifactId>
+					<version>1.2</version>
+					<configuration>
+						<archive>${project.build.directory}/${apk.prefix}-${project.artifactId}-${project.version}.apk</archive>
+						<alias>ActionBarSherlock</alias>
+						<keypass>ActionBarSherlock</keypass>
+						<storepass>ActionBarSherlock</storepass>
+						<!-- Is always run from samples/xxx/ directory. -->
+						<keystore>../../debug.keystore</keystore>
+					</configuration>
 				</plugin>
 
 				<plugin>
@@ -163,6 +165,32 @@
 					<version>2.9.1</version>
 					<configuration>
 						<failsOnError>true</failsOnError>
+					</configuration>
+				</plugin>
+
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-site-plugin</artifactId>
+					<version>3.0</version>
+					<configuration>
+						<skip>true</skip>
+					</configuration>
+				</plugin>
+
+				<plugin>
+					<groupId>comm.github.github</groupId>
+					<artifactId>downloads-maven-plugin</artifactId>
+					<version>0.4</version>
+					<configuration>
+						<description>${project.name}</description>
+						<override>true</override>
+						<includeAttached>true</includeAttached>
+						<includes>
+							<include>*.apk</include>
+						</includes>
+						<excludes>
+							<exclude>*-unaligned.apk</exclude>
+						</excludes>
 					</configuration>
 				</plugin>
 			</plugins>
@@ -180,18 +208,6 @@
 
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-site-plugin</artifactId>
-				<version>2.1</version>
-				<inherited>false</inherited>
-				<configuration>
-					<generateProjectInfo>false</generateProjectInfo>
-					<generateReports>false</generateReports>
-					<siteDirectory>${basedir}/website</siteDirectory>
-				</configuration>
-			</plugin>
-
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-deploy-plugin</artifactId>
 				<version>2.7</version>
 				<dependencies>
@@ -201,6 +217,24 @@
 						<version>1.0-beta-7</version>
 					</dependency>
 				</dependencies>
+			</plugin>
+
+			<plugin>
+				<groupId>com.github.github</groupId>
+				<artifactId>site-maven-plugin</artifactId>
+				<version>0.5</version>
+				<executions>
+					<execution>
+						<phase>site</phase>
+						<goals>
+							<goal>site</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<message>Creating site for ${project.version}.</message>
+					<outputDirectory>website</outputDirectory>
+				</configuration>
 			</plugin>
 		</plugins>
 
@@ -214,11 +248,6 @@
 				<groupId>org.apache.maven.scm</groupId>
 				<artifactId>maven-scm-manager-plexus</artifactId>
 				<version>1.4</version>
-			</extension>
-			<extension>
-				<groupId>org.kathrynhuxtable.maven.wagon</groupId>
-				<artifactId>wagon-gitsite</artifactId>
-				<version>0.3.1</version>
 			</extension>
 		</extensions>
 	</build>
