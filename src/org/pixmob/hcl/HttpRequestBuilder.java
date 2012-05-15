@@ -15,11 +15,15 @@
  */
 package org.pixmob.hcl;
 
+import static org.pixmob.hcl.Constants.HTTP_DELETE;
 import static org.pixmob.hcl.Constants.HTTP_GET;
+import static org.pixmob.hcl.Constants.HTTP_HEAD;
 import static org.pixmob.hcl.Constants.HTTP_POST;
+import static org.pixmob.hcl.Constants.HTTP_PUT;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
 import java.net.HttpURLConnection;
@@ -166,21 +170,25 @@ public final class HttpRequestBuilder {
         try {
             if (parameters != null && !parameters.isEmpty()) {
                 final StringBuilder buf = new StringBuilder(256);
-                if (!HTTP_POST.equals(method)) {
+                if (HTTP_GET.equals(method) || HTTP_HEAD.equals(method)) {
                     buf.append('?');
                 }
                 
+                int paramIdx = 0;
                 for (final Map.Entry<String, String> e : parameters.entrySet()) {
-                    if (buf.length() != 0) {
+                    if (paramIdx != 0) {
                         buf.append("&");
                     }
                     final String name = e.getKey();
                     final String value = e.getValue();
                     buf.append(URLEncoder.encode(name, CONTENT_CHARSET))
+                            .append("=")
                             .append(URLEncoder.encode(value, CONTENT_CHARSET));
+                    ++paramIdx;
                 }
                 
-                if (HTTP_POST.equals(method)) {
+                if (HTTP_POST.equals(method) || HTTP_DELETE.equals(method)
+                        || HTTP_PUT.equals(method)) {
                     try {
                         payload = buf.toString().getBytes(CONTENT_CHARSET);
                     } catch (UnsupportedEncodingException e) {
@@ -198,13 +206,12 @@ public final class HttpRequestBuilder {
             conn.setAllowUserInteraction(false);
             conn.setInstanceFollowRedirects(false);
             conn.setRequestMethod(method);
+            conn.setUseCaches(false);
+            conn.setDoInput(true);
             
-            if (HTTP_GET.equals(method)) {
-                conn.setDoInput(true);
-            }
-            if (HTTP_POST.equals(method)) {
+            if (HTTP_POST.equals(method) || HTTP_DELETE.equals(method)
+                    || HTTP_PUT.equals(method)) {
                 conn.setDoOutput(true);
-                conn.setUseCaches(false);
             }
             
             if (headers != null && !headers.isEmpty()) {
@@ -220,10 +227,14 @@ public final class HttpRequestBuilder {
                 }
             }
             
-            final StringBuilder cookieHeaderValue = new StringBuilder(256);
-            prepareCookieHeader(cookies, cookieHeaderValue);
-            prepareCookieHeader(hc.getInMemoryCookies(), cookieHeaderValue);
-            conn.setRequestProperty("Cookie", cookieHeaderValue.toString());
+            if (cookies != null && !cookies.isEmpty()
+                    || hc.getInMemoryCookies() != null
+                    && !hc.getInMemoryCookies().isEmpty()) {
+                final StringBuilder cookieHeaderValue = new StringBuilder(256);
+                prepareCookieHeader(cookies, cookieHeaderValue);
+                prepareCookieHeader(hc.getInMemoryCookies(), cookieHeaderValue);
+                conn.setRequestProperty("Cookie", cookieHeaderValue.toString());
+            }
             
             final String userAgent = hc.getUserAgent();
             if (userAgent != null) {
@@ -236,7 +247,8 @@ public final class HttpRequestBuilder {
             conn.setRequestProperty("Accept-Encoding", "gzip,deflate");
             conn.setRequestProperty("Accept-Charset", CONTENT_CHARSET);
             
-            if (HTTP_POST.equals(method)) {
+            if (HTTP_POST.equals(method) || HTTP_DELETE.equals(method)
+                    || HTTP_PUT.equals(method)) {
                 conn.setRequestProperty("Content-Type",
                     "application/x-www-form-urlencoded; charset="
                             + CONTENT_CHARSET);
@@ -251,6 +263,12 @@ public final class HttpRequestBuilder {
             }
             
             conn.connect();
+            
+            if (payload != null) {
+                final OutputStream out = conn.getOutputStream();
+                out.write(payload);
+                out.flush();
+            }
             
             final int statusCode = conn.getResponseCode();
             if (statusCode == -1) {

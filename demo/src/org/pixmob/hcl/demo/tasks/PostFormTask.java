@@ -33,7 +33,7 @@ public class PostFormTask extends Task {
     @Override
     protected void doRun() throws Exception {
         final HttpClient hc = createClient();
-        hc.post("http://fr.search.yahoo.com/search")
-                .setParameter("p", "android").execute();
+        hc.post("http://groovyconsole.appspot.com/executor.groovy")
+                .setParameter("script", "printf 'Hello Android!'").execute();
     }
 }
