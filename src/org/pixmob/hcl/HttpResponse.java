@@ -15,7 +15,9 @@
  */
 package org.pixmob.hcl;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -101,6 +103,20 @@ public final class HttpResponse {
      */
     public InputStream getPayload() {
         return payload;
+    }
+    
+    public void read(StringBuilder buffer) throws IOException {
+        String enc = getContentCharset();
+        if (enc == null) {
+            enc = "UTF-8";
+        }
+        
+        final InputStream input = getPayload();
+        final InputStreamReader reader = new InputStreamReader(input, enc);
+        final char[] inBuf = new char[64];
+        for (int charsRead; (charsRead = reader.read(inBuf)) != -1;) {
+            buffer.append(inBuf, 0, charsRead);
+        }
     }
     
     /**

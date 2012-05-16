@@ -15,9 +15,13 @@
  */
 package org.pixmob.hcl.demo.tasks;
 
+import org.json.JSONObject;
 import org.pixmob.hcl.HttpClient;
+import org.pixmob.hcl.HttpResponse;
+import org.pixmob.hcl.HttpResponseHandler;
 import org.pixmob.hcl.demo.R;
 import org.pixmob.hcl.demo.Task;
+import org.pixmob.hcl.demo.TaskExecutionFailedException;
 
 import android.content.Context;
 
@@ -34,6 +38,22 @@ public class PostFormTask extends Task {
     protected void doRun() throws Exception {
         final HttpClient hc = createClient();
         hc.post("http://groovyconsole.appspot.com/executor.groovy")
-                .setParameter("script", "printf 'Hello Android!'").execute();
+                .setParameter("script", "printf 'Hello Android!'")
+                .setHandler(new HttpResponseHandler() {
+                    @Override
+                    public void onResponse(HttpResponse response)
+                            throws Exception {
+                        final StringBuilder rawJson = new StringBuilder(64);
+                        response.read(rawJson);
+                        
+                        final JSONObject json = new JSONObject(rawJson
+                                .toString());
+                        if (!"Hello Android!".equals(json
+                                .getString("outputText"))) {
+                            throw new TaskExecutionFailedException(
+                                    "Invalid response");
+                        }
+                    }
+                }).execute();
     }
 }
