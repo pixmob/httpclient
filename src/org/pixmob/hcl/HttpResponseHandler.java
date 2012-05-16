@@ -15,21 +15,11 @@
  */
 package org.pixmob.hcl;
 
-import java.io.File;
-
 /**
  * This handler is notified when an Http response is received.
  * @author Pixmob
  */
 public class HttpResponseHandler {
-    /**
-     * Create an {@link HttpResponseHandler} instance for writing the response
-     * to a file.
-     */
-    public static HttpResponseHandler toFile(File file) {
-        return new WriteToFileHandler(file);
-    }
-    
     /**
      * The request failed to connect or read data in time.
      */

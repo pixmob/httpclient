@@ -21,6 +21,7 @@ import static org.pixmob.hcl.Constants.HTTP_HEAD;
 import static org.pixmob.hcl.Constants.HTTP_POST;
 import static org.pixmob.hcl.Constants.HTTP_PUT;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -161,6 +162,11 @@ public final class HttpRequestBuilder {
     
     public HttpRequestBuilder setHandler(HttpResponseHandler handler) {
         this.handler = handler;
+        return this;
+    }
+    
+    public HttpRequestBuilder toFile(File file) {
+        setHandler(new WriteToFileHandler(file));
         return this;
     }
     

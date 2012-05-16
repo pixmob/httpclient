@@ -18,7 +18,6 @@ package org.pixmob.hcl.demo.tasks;
 import java.io.File;
 
 import org.pixmob.hcl.HttpClient;
-import org.pixmob.hcl.HttpResponseHandler;
 import org.pixmob.hcl.demo.R;
 import org.pixmob.hcl.demo.Task;
 import org.pixmob.hcl.demo.TaskExecutionFailedException;
@@ -41,8 +40,8 @@ public class DownloadFileTask extends Task {
         imgFile.delete();
         
         final HttpClient hc = createClient();
-        hc.get("http://www.google.fr/images/srpr/logo3w.png")
-                .setHandler(HttpResponseHandler.toFile(imgFile)).execute();
+        hc.get("http://www.google.fr/images/srpr/logo3w.png").toFile(imgFile)
+                .execute();
         
         if (!imgFile.exists() || imgFile.length() == 0) {
             throw new TaskExecutionFailedException("File download failed");
