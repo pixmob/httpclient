@@ -22,7 +22,6 @@ import org.pixmob.hcl.HttpResponse;
 import org.pixmob.hcl.HttpResponseHandler;
 import org.pixmob.hcl.demo.R;
 import org.pixmob.hcl.demo.Task;
-import org.pixmob.hcl.demo.TaskExecutionFailedException;
 
 import android.content.Context;
 
@@ -44,16 +43,8 @@ public class RedirectTask extends Task {
                     @Override
                     public void onResponse(HttpResponse response)
                             throws Exception {
-                        if (!"text/html".equals(response.getContentType())) {
-                            throw new TaskExecutionFailedException(
-                                    "Expected content type text/html, got "
-                                            + response.getContentType());
-                        }
-                        if (!"UTF-8".equals(response.getContentCharset())) {
-                            throw new TaskExecutionFailedException(
-                                    "Expected content charset UTF-8, got "
-                                            + response.getContentCharset());
-                        }
+                        assertEquals("text/html", response.getContentType());
+                        assertEquals("UTF-8", response.getContentCharset());
                     }
                 }).execute();
     }

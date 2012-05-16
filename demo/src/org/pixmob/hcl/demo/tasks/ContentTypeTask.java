@@ -20,7 +20,6 @@ import org.pixmob.hcl.HttpResponse;
 import org.pixmob.hcl.HttpResponseHandler;
 import org.pixmob.hcl.demo.R;
 import org.pixmob.hcl.demo.Task;
-import org.pixmob.hcl.demo.TaskExecutionFailedException;
 
 import android.content.Context;
 
@@ -59,21 +58,10 @@ public class ContentTypeTask extends Task {
         @Override
         public void onResponse(HttpResponse response) throws Exception {
             if (contentType != null) {
-                final String respContentType = response.getContentType();
-                if (!contentType.equals(respContentType)) {
-                    throw new TaskExecutionFailedException(
-                            "Expected content type " + contentType + ", got "
-                                    + respContentType);
-                }
+                assertEquals(contentType, response.getContentType());
             }
-            
             if (contentCharset != null) {
-                final String respContentCharset = response.getContentCharset();
-                if (!contentCharset.equals(respContentCharset)) {
-                    throw new TaskExecutionFailedException(
-                            "Expected content charset " + contentCharset
-                                    + ", got " + respContentCharset);
-                }
+                assertEquals(contentCharset, response.getContentCharset());
             }
         }
     }

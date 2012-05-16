@@ -21,7 +21,6 @@ import org.pixmob.hcl.HttpResponse;
 import org.pixmob.hcl.HttpResponseHandler;
 import org.pixmob.hcl.demo.R;
 import org.pixmob.hcl.demo.Task;
-import org.pixmob.hcl.demo.TaskExecutionFailedException;
 
 import android.content.Context;
 
@@ -48,11 +47,8 @@ public class PostFormTask extends Task {
                         
                         final JSONObject json = new JSONObject(rawJson
                                 .toString());
-                        if (!"Hello Android!".equals(json
-                                .getString("outputText"))) {
-                            throw new TaskExecutionFailedException(
-                                    "Invalid response");
-                        }
+                        assertEquals("Hello Android!",
+                            json.getString("outputText"));
                     }
                 }).execute();
     }

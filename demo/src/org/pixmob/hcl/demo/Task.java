@@ -54,6 +54,18 @@ public abstract class Task {
         return sourceCodeUrl;
     }
     
+    public static void assertEquals(String expected, String tested)
+            throws TaskExecutionFailedException {
+        if (expected == null && tested == null) {
+            return;
+        }
+        if (expected.equals(tested)) {
+            return;
+        }
+        throw new TaskExecutionFailedException("Expected: " + expected
+                + "; got " + tested);
+    }
+    
     public final void run() throws TaskExecutionFailedException {
         try {
             doRun();
