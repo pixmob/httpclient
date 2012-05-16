@@ -215,11 +215,6 @@ public final class HttpRequestBuilder {
             conn.setUseCaches(false);
             conn.setDoInput(true);
             
-            if (HTTP_POST.equals(method) || HTTP_DELETE.equals(method)
-                    || HTTP_PUT.equals(method)) {
-                conn.setDoOutput(true);
-            }
-            
             if (headers != null && !headers.isEmpty()) {
                 for (final Map.Entry<String, List<String>> e : headers
                         .entrySet()) {
@@ -268,13 +263,15 @@ public final class HttpRequestBuilder {
                     (HttpsURLConnection) conn);
             }
             
-            conn.connect();
-            
             if (payload != null) {
+                conn.setDoOutput(true);
+                
                 final OutputStream out = conn.getOutputStream();
                 out.write(payload);
                 out.flush();
             }
+            
+            conn.connect();
             
             final int statusCode = conn.getResponseCode();
             if (statusCode == -1) {
