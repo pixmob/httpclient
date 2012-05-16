@@ -5,7 +5,7 @@ Copyright (C) 2012 Pixmob (http://github.com/pixmob)
 Android provides two methods for making Http(s) requests:
 [HttpURLConnection](http://developer.android.com/reference/java/net/HttpURLConnection.html) and [Apache HttpClient](http://developer.android.com/reference/org/apache/http/impl/client/DefaultHttpClient.html).
 
-The Android development team [recommends](http://android-developers.blogspot.com/2011/09/androids-http-clients.html) the use of HttpURLConnection for newer applications, as this interface is getting better over Android releases.
+The Android development team [recommends](http://android-developers.blogspot.com/2011/09/androids-http-clients.html) the use of HttpURLConnection for new applications, as this interface is getting better over Android releases.
 
 However, using HttpURLConnection on earlier Android devices (before ICS) is troublesome because of the underlying implementation bugs:
 
@@ -32,11 +32,24 @@ Making Http requests with HCL is easy.
 Downloading a file cannot be easier:
 
     File logoFile = new File(context.getCacheDir(), "logo.png");
-    hc.get("http://www.mysite.com/logo.png").setHandler(HttpResponseHandler.toFile(logoFile)).execute();
+    hc.get("http://www.mysite.com/logo.png").toFile(logoFile).execute();
+
+You may want to send POST requests:
+
+    // the response buffer is reusable across requests (GC friendly)
+    final StringBuilder buf = new StringBuilder(64);
+    hc.post("http://www.mysite.com/query").setParameter("q", "hello").setHandler(
+        new HttpResponseHandler() {
+            public void onResponse(HttpResponse response) throws Exception {
+                response.read(buf);
+                System.out.println(buf);
+            }
+        }
+    ).execute();
 
 Please read JavaDoc and [source code](http://github.com/pixmob/hcl/tree/master/src/org/pixmob/hcl) for advanced use.
 
-A sample application is available in the Market: [HCL Demo](https://market.android.com/details?id=org.pixmob.hcl.demo)
+A sample application (with source code) is available in the Play Store: [HCL Demo](https://play.google.com/store/apps/details?id=org.pixmob.hcl.demo).
 
 License
 -------
