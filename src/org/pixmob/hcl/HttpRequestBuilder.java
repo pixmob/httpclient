@@ -248,27 +248,26 @@ public final class HttpRequestBuilder {
             conn.setRequestProperty("Accept-Encoding", "gzip,deflate");
             conn.setRequestProperty("Accept-Charset", CONTENT_CHARSET);
             
-            if (HTTP_POST.equals(method) || HTTP_DELETE.equals(method)
-                    || HTTP_PUT.equals(method)) {
-                conn.setRequestProperty("Content-Type",
-                    "application/x-www-form-urlencoded; charset="
-                            + CONTENT_CHARSET);
-                if (payload != null) {
-                    conn.setFixedLengthStreamingMode(payload.length);
-                }
-            }
-            
             if (conn instanceof HttpsURLConnection) {
                 setupSecureConnection(hc.getContext(),
                     (HttpsURLConnection) conn);
             }
             
-            if (payload != null) {
-                conn.setDoOutput(true);
-                
-                final OutputStream out = conn.getOutputStream();
-                out.write(payload);
-                out.flush();
+            if (HTTP_POST.equals(method) || HTTP_DELETE.equals(method)
+                    || HTTP_PUT.equals(method)) {
+                if (payload != null) {
+                    conn.setDoOutput(true);
+                    conn.setRequestProperty("Content-Type",
+                        "application/x-www-form-urlencoded; charset="
+                                + CONTENT_CHARSET);
+                    conn.setFixedLengthStreamingMode(payload.length);
+                    
+                    final OutputStream out = conn.getOutputStream();
+                    out.write(payload);
+                    out.flush();
+                } else {
+                    conn.setFixedLengthStreamingMode(0);
+                }
             }
             
             conn.connect();
