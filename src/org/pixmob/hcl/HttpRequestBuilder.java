@@ -306,7 +306,12 @@ public final class HttpRequestBuilder {
                 }
             }
 
-            payloadStream = new UncloseableInputStream(getInputStream(conn));
+            if (statusCode / 100 == 4) {
+                // Got an error: cannot read input.
+                payloadStream = new UncloseableInputStream();
+            } else {
+                payloadStream = new UncloseableInputStream(getInputStream(conn));
+            }
             if (handler != null) {
                 final HttpResponse resp = new HttpResponse(statusCode, payloadStream,
                         headerFields == null ? NO_HEADERS : headerFields, inMemoryCookies);
