@@ -11,13 +11,14 @@
 	<parent>
 		<groupId>com.actionbarsherlock</groupId>
 		<artifactId>parent</artifactId>
-		<version>4.0.2</version>
+		<version>4.1.0</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
 	<modules>
 		<module>demos</module>
 		<module>fragments</module>
+		<module>known-bugs</module>
 		<module>roboguice</module>
 		<module>styled</module>
 	</modules>
