@@ -17,7 +17,9 @@ package org.pixmob.httpclient.demo;
 
 import static org.pixmob.httpclient.demo.Constants.TAG;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.pixmob.httpclient.demo.TaskListFragment.TaskContext;
@@ -54,58 +56,54 @@ import com.actionbarsherlock.view.MenuItem;
  * Fragment for displaying task list.
  * @author Pixmob
  */
-public class TaskListFragment extends SherlockListFragment implements
-        LoaderCallbacks<TaskContext> {
+public class TaskListFragment extends SherlockListFragment implements LoaderCallbacks<TaskContext> {
     private TaskContext[] taskContexts;
     private TaskContextAdapter taskContextAdapter;
     private MenuItem startMenuItem;
     private volatile boolean abortDemo;
-    
+
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         setHasOptionsMenu(true);
-        
+
         final Context context = getActivity().getApplicationContext();
-        taskContexts = new TaskContext[] {
-                new TaskContext(new DownloadFileTask(context)),
-                new TaskContext(new RedirectTask(context)),
-                new TaskContext(new PostFormTask(context)),
-                new TaskContext(new ContentTypeTask(context)),
-                new TaskContext(new HttpsTask(context)), };
+        taskContexts = new TaskContext[] { new TaskContext(new DownloadFileTask(context)),
+                new TaskContext(new RedirectTask(context)), new TaskContext(new PostFormTask(context)),
+                new TaskContext(new ContentTypeTask(context)), new TaskContext(new HttpsTask(context)), };
         taskContextAdapter = new TaskContextAdapter(getActivity(), taskContexts);
         setListAdapter(taskContextAdapter);
-        
+
         if (savedInstanceState != null) {
-            final TaskState[] states = (TaskState[]) savedInstanceState
-                    .getSerializable("taskStates");
-            for (int i = 0; i < states.length; ++i) {
-                taskContexts[i].state = states[i];
-                
-                if (TaskState.RUNNING.equals(states[i])) {
+            @SuppressWarnings("unchecked")
+            final List<TaskState> states = (List<TaskState>) savedInstanceState.getSerializable("taskStates");
+            for (int i = 0; i < states.size(); ++i) {
+                taskContexts[i].state = states.get(i);
+
+                if (TaskState.RUNNING.equals(states.get(i))) {
                     getLoaderManager().restartLoader(i, null, this);
                 }
             }
         }
     }
-    
+
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putBoolean("abortDemo", abortDemo);
-        
-        final TaskState[] states = new TaskState[taskContexts.length];
+
+        final ArrayList<TaskState> states = new ArrayList<TaskListFragment.TaskState>(taskContexts.length);
         for (int i = 0; i < taskContexts.length; ++i) {
-            states[i] = taskContexts[i].state;
+            states.add(taskContexts[i].state);
         }
         outState.putSerializable("taskStates", states);
     }
-    
+
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
         super.onListItemClick(l, v, position, id);
         setSelection(position);
-        
+
         final TaskContext taskContext = taskContextAdapter.getItem(position);
         final String url = taskContext.task.getSourceCodeUrl();
         if (url != null) {
@@ -113,7 +111,7 @@ public class TaskListFragment extends SherlockListFragment implements
             startActivity(i);
         }
     }
-    
+
     /**
      * Check if any task is running.
      */
@@ -127,45 +125,40 @@ public class TaskListFragment extends SherlockListFragment implements
         }
         return false;
     }
-    
+
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
-        
-        startMenuItem = menu.add(Menu.NONE, R.string.menu_start_demo,
-            Menu.NONE, R.string.menu_start_demo);
-        startMenuItem.setIcon(R.drawable.ic_menu_play_clip)
-                .setShowAsAction(
-                    MenuItem.SHOW_AS_ACTION_IF_ROOM
-                            | MenuItem.SHOW_AS_ACTION_WITH_TEXT);
-        
+
+        startMenuItem = menu.add(Menu.NONE, R.string.menu_start_demo, Menu.NONE, R.string.menu_start_demo);
+        startMenuItem.setIcon(R.drawable.ic_menu_play_clip).setShowAsAction(
+                MenuItem.SHOW_AS_ACTION_IF_ROOM | MenuItem.SHOW_AS_ACTION_WITH_TEXT);
+
         if (isDemoRunning()) {
             startMenuItem.setTitle(R.string.menu_stop_demo);
             startMenuItem.setIcon(R.drawable.ic_menu_stop);
         }
-        
+
         menu.add(Menu.NONE, R.string.menu_help, Menu.NONE, R.string.menu_help)
                 .setIcon(R.drawable.ic_menu_help)
-                .setShowAsAction(
-                    MenuItem.SHOW_AS_ACTION_IF_ROOM
-                            | MenuItem.SHOW_AS_ACTION_WITH_TEXT);
+                .setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM | MenuItem.SHOW_AS_ACTION_WITH_TEXT);
     }
-    
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.string.menu_start_demo:
-                onMenuStart();
-                break;
-            case R.string.menu_help:
-                onMenuHelp();
-                break;
-            default:
-                return false;
+        case R.string.menu_start_demo:
+            onMenuStart();
+            break;
+        case R.string.menu_help:
+            onMenuHelp();
+            break;
+        default:
+            return false;
         }
         return true;
     }
-    
+
     private void onMenuStart() {
         if (getLoaderManager().hasRunningLoaders()) {
             abortDemo = true;
@@ -173,36 +166,36 @@ public class TaskListFragment extends SherlockListFragment implements
             abortDemo = false;
             startMenuItem.setTitle(R.string.menu_stop_demo);
             startMenuItem.setIcon(R.drawable.ic_menu_stop);
-            
+
             for (final TaskContext taskContext : taskContexts) {
                 taskContext.state = TaskState.RUNNABLE;
             }
-            
+
             getLoaderManager().restartLoader(0, null, this);
         }
     }
-    
+
     private void onMenuHelp() {
         new HelpDialogFragment().show(getFragmentManager(), "help");
     }
-    
+
     @Override
     public Loader<TaskContext> onCreateLoader(int id, Bundle args) {
         final TaskContext taskContext = taskContexts[id];
         taskContext.state = TaskState.RUNNING;
         taskContextAdapter.notifyDataSetChanged();
-        
+
         return new TaskExecutor(getActivity(), taskContext);
     }
-    
+
     @Override
     public void onLoaderReset(Loader<TaskContext> loader) {
     }
-    
+
     @Override
     public void onLoadFinished(Loader<TaskContext> loader, TaskContext result) {
         taskContextAdapter.notifyDataSetChanged();
-        
+
         final int nextId = loader.getId() + 1;
         if (!abortDemo && nextId != taskContexts.length) {
             getLoaderManager().restartLoader(nextId, null, this);
@@ -212,26 +205,25 @@ public class TaskListFragment extends SherlockListFragment implements
             startMenuItem.setIcon(R.drawable.ic_menu_play_clip);
         }
     }
-    
+
     /**
      * Execute {@link Task} instance in a background thread.
      * @author Pixmob
      */
     private static class TaskExecutor extends AsyncTaskLoader<TaskContext> {
         private final TaskContext taskContext;
-        
-        public TaskExecutor(final FragmentActivity context,
-                final TaskContext taskContext) {
+
+        public TaskExecutor(final FragmentActivity context, final TaskContext taskContext) {
             super(context);
             this.taskContext = taskContext;
         }
-        
+
         @Override
         protected void onStartLoading() {
             super.onStartLoading();
             forceLoad();
         }
-        
+
         @Override
         public TaskContext loadInBackground() {
             final String taskName = taskContext.task.getName();
@@ -244,11 +236,11 @@ public class TaskListFragment extends SherlockListFragment implements
                 taskContext.state = TaskState.FAILED;
                 Log.e(TAG, "Task execution failed: " + taskName, e);
             }
-            
+
             return taskContext;
         }
     }
-    
+
     /**
      * {@link ArrayAdapter} implementation for displaying {@link Task}
      * instances.
@@ -258,27 +250,21 @@ public class TaskListFragment extends SherlockListFragment implements
         private static final Map<TaskState, Integer> TASK_COLORS = new HashMap<TaskListFragment.TaskState, Integer>(
                 4);
         private final LayoutInflater layoutInflater;
-        
-        public TaskContextAdapter(final Context context,
-                final TaskContext[] taskContexts) {
+
+        public TaskContextAdapter(final Context context, final TaskContext[] taskContexts) {
             super(context, R.layout.task_row, taskContexts);
-            layoutInflater = (LayoutInflater) context
-                    .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            
+            layoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+
             // Lazy initialize colors.
             if (TASK_COLORS.isEmpty()) {
                 final Resources r = context.getResources();
-                TASK_COLORS.put(TaskState.RUNNABLE,
-                    r.getColor(R.color.task_color_runnable));
-                TASK_COLORS.put(TaskState.RUNNING,
-                    r.getColor(R.color.task_color_running));
-                TASK_COLORS.put(TaskState.FINISHED,
-                    r.getColor(R.color.task_color_finished));
-                TASK_COLORS.put(TaskState.FAILED,
-                    r.getColor(R.color.task_color_failed));
+                TASK_COLORS.put(TaskState.RUNNABLE, r.getColor(R.color.task_color_runnable));
+                TASK_COLORS.put(TaskState.RUNNING, r.getColor(R.color.task_color_running));
+                TASK_COLORS.put(TaskState.FINISHED, r.getColor(R.color.task_color_finished));
+                TASK_COLORS.put(TaskState.FAILED, r.getColor(R.color.task_color_failed));
             }
         }
-        
+
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
             final View row;
@@ -287,24 +273,23 @@ public class TaskListFragment extends SherlockListFragment implements
             } else {
                 row = convertView;
             }
-            
+
             final TaskContext taskContext = getItem(position);
             final TextView tv = (TextView) row.findViewById(R.id.task_name);
             tv.setText(taskContext.task.getName());
             tv.setTextColor(TASK_COLORS.get(taskContext.state));
-            
-            final ProgressBar taskProgress = (ProgressBar) row
-                    .findViewById(R.id.task_progress);
+
+            final ProgressBar taskProgress = (ProgressBar) row.findViewById(R.id.task_progress);
             if (TaskState.RUNNING.equals(taskContext.state)) {
                 taskProgress.setVisibility(View.VISIBLE);
             } else {
                 taskProgress.setVisibility(View.GONE);
             }
-            
+
             return row;
         }
     }
-    
+
     /**
      * {@link Task} context.
      * @author Pixmob
@@ -312,12 +297,12 @@ public class TaskListFragment extends SherlockListFragment implements
     public static class TaskContext {
         public final Task task;
         public volatile TaskState state = TaskState.RUNNABLE;
-        
+
         public TaskContext(final Task task) {
             this.task = task;
         }
     }
-    
+
     /**
      * {@link Task} state.
      * @author Pixmob
