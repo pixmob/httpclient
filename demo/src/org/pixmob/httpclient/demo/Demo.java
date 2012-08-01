@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.pixmob.hcl.demo;
+package org.pixmob.httpclient.demo;
 
 import android.os.Bundle;
 

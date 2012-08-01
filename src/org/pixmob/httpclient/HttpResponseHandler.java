@@ -13,22 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.pixmob.hcl;
+package org.pixmob.httpclient;
 
 /**
- * This error is thrown when the {@link HttpClient} failed to execute a network
- * operation.
+ * This handler is notified when an Http response is received.
  * @author Pixmob
  */
-public final class HttpClientException extends Exception {
-    private static final long serialVersionUID = 1L;
-    
-    HttpClientException(final String message, final Throwable cause) {
-        super(message);
-        initCause(cause);
+public class HttpResponseHandler {
+    /**
+     * The request failed to connect or read data in time.
+     */
+    public void onTimeout() throws Exception {
+        throw new HttpClientException("Timeout");
     }
     
-    HttpClientException(final String message) {
-        this(message, null);
+    /**
+     * The request was successfully sent and a response is available.
+     */
+    public void onResponse(HttpResponse response) throws Exception {
     }
 }

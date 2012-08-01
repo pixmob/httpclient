@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">HCL Demo</string>
+    <string name="app_name">Pixmob HttpClient Demo</string>
     <string name="menu_start_demo">Start demo</string>
     <string name="menu_stop_demo">Stop demo</string>
     <string name="menu_help">Help</string>
@@ -12,6 +12,6 @@
     <string name="task_content_type">Content Type</string>
     <string name="task_https">HTTPS</string>
     <string name="help_title">Help!</string>
-    <string name="help_message">This application is a live demonstration of the HttpClientLibrary from Pixmob.\n\nClick on \'Play\' to start the demonstration.\nClick on an item to show source code.</string>
+    <string name="help_message">This application is a live demonstration of Pixmob HttpClient.\n\nClick on \'Play\' to start the demonstration.\nClick on an item to show source code.</string>
 
 </resources>

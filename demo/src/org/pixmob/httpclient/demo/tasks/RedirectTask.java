@@ -13,15 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.pixmob.hcl.demo.tasks;
+package org.pixmob.httpclient.demo.tasks;
 
 import java.net.HttpURLConnection;
 
-import org.pixmob.hcl.HttpClient;
-import org.pixmob.hcl.HttpResponse;
-import org.pixmob.hcl.HttpResponseHandler;
-import org.pixmob.hcl.demo.R;
-import org.pixmob.hcl.demo.Task;
+import org.pixmob.httpclient.HttpClient;
+import org.pixmob.httpclient.HttpResponse;
+import org.pixmob.httpclient.HttpResponseHandler;
+import org.pixmob.httpclient.demo.R;
+import org.pixmob.httpclient.demo.Task;
 
 import android.content.Context;
 
@@ -33,16 +33,14 @@ public class RedirectTask extends Task {
     public RedirectTask(final Context context) {
         super(context, R.string.task_redirect);
     }
-    
+
     @Override
     protected void doRun() throws Exception {
         final HttpClient hc = createClient();
-        hc.get("http://google.com")
-                .expectStatusCode(HttpURLConnection.HTTP_MOVED_PERM)
+        hc.get("http://google.com").expectStatusCode(HttpURLConnection.HTTP_MOVED_PERM)
                 .setHandler(new HttpResponseHandler() {
                     @Override
-                    public void onResponse(HttpResponse response)
-                            throws Exception {
+                    public void onResponse(HttpResponse response) throws Exception {
                         assertEquals("text/html", response.getContentType());
                         assertEquals("UTF-8", response.getContentCharset());
                     }

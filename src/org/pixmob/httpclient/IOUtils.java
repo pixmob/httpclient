@@ -13,18 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.pixmob.hcl.demo;
+package org.pixmob.httpclient;
+
+import java.io.Closeable;
+import java.io.IOException;
 
 /**
- * Application constants.
+ * I/0 utilities.
  * @author Pixmob
  */
-final class Constants {
-    /**
-     * Logging tag.
-     */
-    public static final String TAG = "HCL/Demo";
+final class IOUtils {
+    private IOUtils() {
+    }
     
-    private Constants() {
+    /**
+     * Quietly close a stream. This method accepts <code>null</code> values.
+     * @param stream stream to close
+     */
+    public static void close(Closeable stream) {
+        if (stream != null) {
+            try {
+                stream.close();
+            } catch (IOException ignore) {
+            }
+        }
     }
 }

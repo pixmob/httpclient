@@ -13,38 +13,35 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.pixmob.hcl.demo.tasks;
+package org.pixmob.httpclient.demo.tasks;
 
-import java.io.File;
+import java.net.HttpURLConnection;
 
-import org.pixmob.hcl.HttpClient;
-import org.pixmob.hcl.demo.R;
-import org.pixmob.hcl.demo.Task;
-import org.pixmob.hcl.demo.TaskExecutionFailedException;
+import org.pixmob.httpclient.HttpClient;
+import org.pixmob.httpclient.demo.R;
+import org.pixmob.httpclient.demo.Task;
 
 import android.content.Context;
 
 /**
- * {@link Task} implementation for downloading a file.
+ * {@link Task} implementation for connecting using Https.
  * @author Pixmob
  */
-public class DownloadFileTask extends Task {
-    public DownloadFileTask(final Context context) {
-        super(context, R.string.task_download_file);
+public class HttpsTask extends Task {
+    public HttpsTask(final Context context) {
+        super(context, R.string.task_https);
     }
-    
+
     @Override
     protected void doRun() throws Exception {
-        final File imgFile = new File(getContext().getCacheDir(),
-                "google_logo.png");
-        imgFile.delete();
-        
+        final String[] httpsUrls = { "https://www.google.com", "https://www.facebook.com",
+                "https://twitter.com", "https://mobile.free.fr/moncompte/", };
+
         final HttpClient hc = createClient();
-        hc.get("http://www.google.fr/images/srpr/logo3w.png").toFile(imgFile)
-                .execute();
-        
-        if (!imgFile.exists() || imgFile.length() == 0) {
-            throw new TaskExecutionFailedException("File download failed");
+        for (final String url : httpsUrls) {
+            hc.get(url)
+                    .expectStatusCode(HttpURLConnection.HTTP_OK, HttpURLConnection.HTTP_MOVED_TEMP,
+                            HttpURLConnection.HTTP_MOVED_PERM).execute();
         }
     }
 }

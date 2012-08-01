@@ -13,19 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.pixmob.hcl.demo;
+package org.pixmob.httpclient.demo;
 
-import static org.pixmob.hcl.demo.Constants.TAG;
+import static org.pixmob.httpclient.demo.Constants.TAG;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import org.pixmob.hcl.demo.TaskListFragment.TaskContext;
-import org.pixmob.hcl.demo.tasks.ContentTypeTask;
-import org.pixmob.hcl.demo.tasks.DownloadFileTask;
-import org.pixmob.hcl.demo.tasks.HttpsTask;
-import org.pixmob.hcl.demo.tasks.PostFormTask;
-import org.pixmob.hcl.demo.tasks.RedirectTask;
+import org.pixmob.httpclient.demo.TaskListFragment.TaskContext;
+import org.pixmob.httpclient.demo.tasks.ContentTypeTask;
+import org.pixmob.httpclient.demo.tasks.DownloadFileTask;
+import org.pixmob.httpclient.demo.tasks.HttpsTask;
+import org.pixmob.httpclient.demo.tasks.PostFormTask;
+import org.pixmob.httpclient.demo.tasks.RedirectTask;
 
 import android.content.Context;
 import android.content.Intent;

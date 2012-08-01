@@ -13,29 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.pixmob.hcl;
-
-import java.io.Closeable;
-import java.io.IOException;
+package org.pixmob.httpclient.demo;
 
 /**
- * I/0 utilities.
+ * This error is thrown when a task failed to execute.
  * @author Pixmob
  */
-final class IOUtils {
-    private IOUtils() {
+public class TaskExecutionFailedException extends Exception {
+    private static final long serialVersionUID = 1L;
+    
+    public TaskExecutionFailedException(final String message,
+            final Throwable cause) {
+        super(message, cause);
     }
     
-    /**
-     * Quietly close a stream. This method accepts <code>null</code> values.
-     * @param stream stream to close
-     */
-    public static void close(Closeable stream) {
-        if (stream != null) {
-            try {
-                stream.close();
-            } catch (IOException ignore) {
-            }
-        }
+    public TaskExecutionFailedException(final String message) {
+        this(message, null);
     }
 }

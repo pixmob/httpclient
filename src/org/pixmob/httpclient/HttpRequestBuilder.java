@@ -13,13 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.pixmob.hcl;
+package org.pixmob.httpclient;
 
-import static org.pixmob.hcl.Constants.HTTP_DELETE;
-import static org.pixmob.hcl.Constants.HTTP_GET;
-import static org.pixmob.hcl.Constants.HTTP_HEAD;
-import static org.pixmob.hcl.Constants.HTTP_POST;
-import static org.pixmob.hcl.Constants.HTTP_PUT;
+import static org.pixmob.httpclient.Constants.HTTP_DELETE;
+import static org.pixmob.httpclient.Constants.HTTP_GET;
+import static org.pixmob.httpclient.Constants.HTTP_HEAD;
+import static org.pixmob.httpclient.Constants.HTTP_POST;
+import static org.pixmob.httpclient.Constants.HTTP_PUT;
 
 import java.io.File;
 import java.io.IOException;
@@ -74,8 +74,8 @@ public final class HttpRequestBuilder {
     private Map<String, String> cookies;
     private Map<String, List<String>> headers;
     private Map<String, String> parameters;
-    private byte[] payload;
-    private boolean payloadSet;
+    private byte[] content;
+    private boolean contentSet;
     private String contentType;
     private HttpResponseHandler handler;
 
@@ -102,9 +102,9 @@ public final class HttpRequestBuilder {
         return this;
     }
 
-    public HttpRequestBuilder setPayload(byte[] payload) {
-        this.payload = payload;
-        payloadSet = true;
+    public HttpRequestBuilder setContent(byte[] content) {
+        this.content = content;
+        contentSet = true;
         return this;
     }
 
@@ -202,10 +202,10 @@ public final class HttpRequestBuilder {
                     ++paramIdx;
                 }
 
-                if (!payloadSet
+                if (!contentSet
                         && (HTTP_POST.equals(method) || HTTP_DELETE.equals(method) || HTTP_PUT.equals(method))) {
                     try {
-                        payload = buf.toString().getBytes(CONTENT_CHARSET);
+                        content = buf.toString().getBytes(CONTENT_CHARSET);
                     } catch (UnsupportedEncodingException e) {
                         // Unlikely to happen.
                         throw new HttpClientException("Encoding error", e);
@@ -260,18 +260,18 @@ public final class HttpRequestBuilder {
             }
 
             if (HTTP_POST.equals(method) || HTTP_DELETE.equals(method) || HTTP_PUT.equals(method)) {
-                if (payload != null) {
+                if (content != null) {
                     conn.setDoOutput(true);
-                    if (!payloadSet) {
+                    if (!contentSet) {
                         conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded; charset="
                                 + CONTENT_CHARSET);
                     } else if (contentType != null) {
                         conn.setRequestProperty("Content-Type", contentType);
                     }
-                    conn.setFixedLengthStreamingMode(payload.length);
+                    conn.setFixedLengthStreamingMode(content.length);
 
                     final OutputStream out = conn.getOutputStream();
-                    out.write(payload);
+                    out.write(content);
                     out.flush();
                 } else {
                     conn.setFixedLengthStreamingMode(0);
@@ -386,7 +386,7 @@ public final class HttpRequestBuilder {
     private static KeyStore loadCertificates(Context context) throws IOException {
         try {
             final KeyStore localTrustStore = KeyStore.getInstance("BKS");
-            final InputStream in = context.getResources().openRawResource(R.raw.hcl_keystore);
+            final InputStream in = context.getResources().openRawResource(R.raw.hc_keystore);
             try {
                 localTrustStore.load(in, null);
             } finally {

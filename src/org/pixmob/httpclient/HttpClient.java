@@ -13,13 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.pixmob.hcl;
+package org.pixmob.httpclient;
 
-import static org.pixmob.hcl.Constants.HTTP_DELETE;
-import static org.pixmob.hcl.Constants.HTTP_GET;
-import static org.pixmob.hcl.Constants.HTTP_HEAD;
-import static org.pixmob.hcl.Constants.HTTP_POST;
-import static org.pixmob.hcl.Constants.HTTP_PUT;
+import static org.pixmob.httpclient.Constants.HTTP_DELETE;
+import static org.pixmob.httpclient.Constants.HTTP_GET;
+import static org.pixmob.httpclient.Constants.HTTP_HEAD;
+import static org.pixmob.httpclient.Constants.HTTP_POST;
+import static org.pixmob.httpclient.Constants.HTTP_PUT;
 
 import java.util.HashMap;
 import java.util.Map;

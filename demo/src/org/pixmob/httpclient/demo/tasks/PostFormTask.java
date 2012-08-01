@@ -13,14 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.pixmob.hcl.demo.tasks;
+package org.pixmob.httpclient.demo.tasks;
 
 import org.json.JSONObject;
-import org.pixmob.hcl.HttpClient;
-import org.pixmob.hcl.HttpResponse;
-import org.pixmob.hcl.HttpResponseHandler;
-import org.pixmob.hcl.demo.R;
-import org.pixmob.hcl.demo.Task;
+import org.pixmob.httpclient.HttpClient;
+import org.pixmob.httpclient.HttpResponse;
+import org.pixmob.httpclient.HttpResponseHandler;
+import org.pixmob.httpclient.demo.R;
+import org.pixmob.httpclient.demo.Task;
 
 import android.content.Context;
 
@@ -32,23 +32,19 @@ public class PostFormTask extends Task {
     public PostFormTask(final Context context) {
         super(context, R.string.task_post_form);
     }
-    
+
     @Override
     protected void doRun() throws Exception {
         final HttpClient hc = createClient();
         hc.post("http://groovyconsole.appspot.com/executor.groovy")
-                .setParameter("script", "printf 'Hello Android!'")
-                .setHandler(new HttpResponseHandler() {
+                .setParameter("script", "printf 'Hello Android!'").setHandler(new HttpResponseHandler() {
                     @Override
-                    public void onResponse(HttpResponse response)
-                            throws Exception {
+                    public void onResponse(HttpResponse response) throws Exception {
                         final StringBuilder rawJson = new StringBuilder(64);
                         response.read(rawJson);
-                        
-                        final JSONObject json = new JSONObject(rawJson
-                                .toString());
-                        assertEquals("Hello Android!",
-                            json.getString("outputText"));
+
+                        final JSONObject json = new JSONObject(rawJson.toString());
+                        assertEquals("Hello Android!", json.getString("outputText"));
                     }
                 }).execute();
     }

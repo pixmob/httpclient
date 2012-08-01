@@ -16,10 +16,10 @@ However, using HttpURLConnection on earlier Android devices (before ICS) is trou
  5. [incomplete read](http://docs.oracle.com/javase/6/docs/technotes/guides/net/http-keepalive.html)
  6. [transparent Gzip compression](http://code.google.com/p/android/issues/detail?id=16227)
 
-The framework HttpClientLibrary (HCL) provides a clean interface to HttpURLConnection, with
+The framework Pixmob HttpClient (PHC) provides a clean interface to HttpURLConnection, with
 workarounds for known bugs, from Android 2.1 to Android 4.0.
 
-Using HCL will make your code easier to understand, while leveraging the Android native network layer.
+Using PHC will make your code easier to understand, while leveraging the Android native network layer.
 
 Usage
 -----
@@ -47,9 +47,9 @@ You may want to send POST requests:
         }
     ).execute();
 
-Please read JavaDoc and [source code](http://github.com/pixmob/hcl/tree/master/src/org/pixmob/hcl) for advanced use.
+Please read JavaDoc and [source code](http://github.com/pixmob/httpclient/tree/master/src/org/pixmob/httpclient) for advanced use.
 
-A sample application (with source code) is available in the Play Store: [HCL Demo](https://play.google.com/store/apps/details?id=org.pixmob.hcl.demo).
+A sample application (with source code) is available in the Play Store: [HCL Demo](https://play.google.com/store/apps/details?id=org.pixmob.httpclient.demo).
 
 License
 -------

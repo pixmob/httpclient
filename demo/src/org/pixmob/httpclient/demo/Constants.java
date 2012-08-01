@@ -13,21 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.pixmob.hcl.demo;
+package org.pixmob.httpclient.demo;
 
 /**
- * This error is thrown when a task failed to execute.
+ * Application constants.
  * @author Pixmob
  */
-public class TaskExecutionFailedException extends Exception {
-    private static final long serialVersionUID = 1L;
+final class Constants {
+    /**
+     * Logging tag.
+     */
+    public static final String TAG = "HCL/Demo";
     
-    public TaskExecutionFailedException(final String message,
-            final Throwable cause) {
-        super(message, cause);
-    }
-    
-    public TaskExecutionFailedException(final String message) {
-        this(message, null);
+    private Constants() {
     }
 }

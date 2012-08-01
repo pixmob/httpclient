@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.pixmob.hcl.demo;
+package org.pixmob.httpclient.demo;
 
-import org.pixmob.hcl.HttpClient;
+import org.pixmob.httpclient.HttpClient;
 
 import android.content.Context;
 
@@ -27,45 +27,43 @@ public abstract class Task {
     private final Context context;
     private final String name;
     private final String sourceCodeUrl;
-    
+
     public Task(final Context context, final int name) {
         this.context = context;
         this.name = context.getString(name);
-        this.sourceCodeUrl = "https://raw.github.com/pixmob/hcl/master/demo/src/"
+        this.sourceCodeUrl = "https://raw.github.com/pixmob/httpclient/master/demo/src/"
                 + getClass().getName().replace('.', '/') + ".java";
     }
-    
+
     protected HttpClient createClient() {
         final HttpClient hc = new HttpClient(context);
         hc.setConnectTimeout(4000);
         hc.setReadTimeout(8000);
         return hc;
     }
-    
+
     public Context getContext() {
         return context;
     }
-    
+
     public String getName() {
         return name;
     }
-    
+
     public String getSourceCodeUrl() {
         return sourceCodeUrl;
     }
-    
-    public static void assertEquals(String expected, String tested)
-            throws TaskExecutionFailedException {
+
+    public static void assertEquals(String expected, String tested) throws TaskExecutionFailedException {
         if (expected == null && tested == null) {
             return;
         }
         if (expected.equals(tested)) {
             return;
         }
-        throw new TaskExecutionFailedException("Expected: " + expected
-                + "; got " + tested);
+        throw new TaskExecutionFailedException("Expected: " + expected + "; got " + tested);
     }
-    
+
     public final void run() throws TaskExecutionFailedException {
         try {
             doRun();
@@ -75,6 +73,6 @@ public abstract class Task {
             throw new TaskExecutionFailedException("Task execution failed", e);
         }
     }
-    
+
     protected abstract void doRun() throws Exception;
 }

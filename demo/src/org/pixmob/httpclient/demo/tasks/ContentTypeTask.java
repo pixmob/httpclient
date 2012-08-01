@@ -13,13 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.pixmob.hcl.demo.tasks;
+package org.pixmob.httpclient.demo.tasks;
 
-import org.pixmob.hcl.HttpClient;
-import org.pixmob.hcl.HttpResponse;
-import org.pixmob.hcl.HttpResponseHandler;
-import org.pixmob.hcl.demo.R;
-import org.pixmob.hcl.demo.Task;
+import org.pixmob.httpclient.HttpClient;
+import org.pixmob.httpclient.HttpResponse;
+import org.pixmob.httpclient.HttpResponseHandler;
+import org.pixmob.httpclient.demo.R;
+import org.pixmob.httpclient.demo.Task;
 
 import android.content.Context;
 
@@ -31,30 +31,27 @@ public class ContentTypeTask extends Task {
     public ContentTypeTask(final Context context) {
         super(context, R.string.task_content_type);
     }
-    
+
     @Override
     protected void doRun() throws Exception {
         final HttpClient hc = createClient();
-        hc.get("http://www.wired.com/")
-                .setHandler(new CheckContentHandler("text/html", "UTF-8"))
-                .execute();
+        hc.get("http://www.wired.com/").setHandler(new CheckContentHandler("text/html", "UTF-8")).execute();
         hc.head("http://www.google.com/intl/en_com/images/srpr/logo3w.png")
-                .setHandler(new CheckContentHandler("image/png", null))
-                .execute();
+                .setHandler(new CheckContentHandler("image/png", null)).execute();
     }
+
     /**
      * Handler for checking content type of an Http response.
      */
     private static class CheckContentHandler extends HttpResponseHandler {
         private final String contentType;
         private final String contentCharset;
-        
-        public CheckContentHandler(final String contentType,
-                final String contentEncoding) {
+
+        public CheckContentHandler(final String contentType, final String contentEncoding) {
             this.contentType = contentType;
             this.contentCharset = contentEncoding;
         }
-        
+
         @Override
         public void onResponse(HttpResponse response) throws Exception {
             if (contentType != null) {
