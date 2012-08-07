@@ -306,7 +306,7 @@ public final class HttpRequestBuilder {
                 }
             }
 
-            if (statusCode / 100 == 4) {
+            if (isStatusCodeError(statusCode)) {
                 // Got an error: cannot read input.
                 payloadStream = new UncloseableInputStream();
             } else {
@@ -349,6 +349,11 @@ public final class HttpRequestBuilder {
                 conn.disconnect();
             }
         }
+    }
+
+    private static boolean isStatusCodeError(int sc) {
+        final int i = sc / 100;
+        return i == 4 || i == 5;
     }
 
     private static void prepareCookieHeader(Map<String, String> cookies, StringBuilder headerValue) {
