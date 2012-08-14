@@ -24,7 +24,7 @@ Using PHC will make your code easier to understand, while leveraging the Android
 Usage
 -----
 
-Making Http requests with HCL is easy.
+Making Http requests with PHC is easy.
 
     HttpClient hc = new HttpClient();
     hc.get("http://www.google.com").execute();
@@ -49,7 +49,7 @@ You may want to send POST requests:
 
 Please read JavaDoc and [source code](http://github.com/pixmob/httpclient/tree/master/src/org/pixmob/httpclient) for advanced use.
 
-A sample application (with source code) is available in the Play Store: [HCL Demo](https://play.google.com/store/apps/details?id=org.pixmob.httpclient.demo).
+A sample application (with source code) is available in this repository.
 
 License
 -------
