@@ -156,6 +156,7 @@ public final class HttpClient {
     public String getUserAgent() {
         if (userAgent == null && DEFAULT_USER_AGENT == null) {
             DEFAULT_USER_AGENT = getDefaultUserAgent(context);
+            userAgent = DEFAULT_USER_AGENT; // set default user agent to userAgent property
         }
         return userAgent;
     }
