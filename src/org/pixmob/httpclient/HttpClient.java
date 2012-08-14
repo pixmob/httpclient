@@ -25,7 +25,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import android.content.Context;
-import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Build;
 
 /**
@@ -40,16 +39,14 @@ public final class HttpClient {
             System.setProperty("http.keepAlive", "false");
         }
     }
-    
-    private static final String VERSION = "0.1.0";
-    private static String DEFAULT_USER_AGENT;
+
+    private static final String DEFAULT_USER_AGENT = getDefaultUserAgent();
     private final Context context;
     private int connectTimeout;
     private int readTimeout;
-    private String userAgent = "PixmobHttpClient/" + VERSION;
-    private final Map<String, String> inMemoryCookies = new HashMap<String, String>(
-            8);
-    
+    private String userAgent;
+    private final Map<String, String> inMemoryCookies = new HashMap<String, String>(8);
+
     /**
      * Create a new instance for this {@link Context}.
      */
@@ -59,11 +56,11 @@ public final class HttpClient {
         }
         this.context = context;
     }
-    
+
     Context getContext() {
         return context;
     }
-    
+
     /**
      * Prepare a new request with the request method <code>GET</code>.
      */
@@ -73,7 +70,7 @@ public final class HttpClient {
         }
         return new HttpRequestBuilder(this, uri, HTTP_GET);
     }
-    
+
     /**
      * Prepare a new request with the request method <code>HEAD</code>.
      */
@@ -83,7 +80,7 @@ public final class HttpClient {
         }
         return new HttpRequestBuilder(this, uri, HTTP_HEAD);
     }
-    
+
     /**
      * Prepare a new request with the request method <code>POST</code>.
      */
@@ -93,7 +90,7 @@ public final class HttpClient {
         }
         return new HttpRequestBuilder(this, uri, HTTP_POST);
     }
-    
+
     /**
      * Prepare a new request with the request method <code>PUT</code>.
      */
@@ -103,7 +100,7 @@ public final class HttpClient {
         }
         return new HttpRequestBuilder(this, uri, HTTP_PUT);
     }
-    
+
     /**
      * Prepare a new request with the request method <code>DELETE</code>.
      */
@@ -113,77 +110,67 @@ public final class HttpClient {
         }
         return new HttpRequestBuilder(this, uri, HTTP_DELETE);
     }
-    
+
     /**
      * Get the connect timeout in seconds.
      */
     public int getConnectTimeout() {
         return connectTimeout;
     }
-    
+
     /**
      * Set the connect timeout in seconds.
      */
     public void setConnectTimeout(int connectTimeout) {
         if (connectTimeout < 0) {
-            throw new IllegalArgumentException("Invalid connect timeout: "
-                    + connectTimeout);
+            throw new IllegalArgumentException("Invalid connect timeout: " + connectTimeout);
         }
         this.connectTimeout = connectTimeout;
     }
-    
+
     /**
      * Get the read timeout in seconds.
      */
     public int getReadTimeout() {
         return readTimeout;
     }
-    
+
     /**
      * Set the read timeout in seconds.
      */
     public void setReadTimeout(int readTimeout) {
         if (readTimeout < 0) {
-            throw new IllegalArgumentException("Invalid read timeout: "
-                    + readTimeout);
+            throw new IllegalArgumentException("Invalid read timeout: " + readTimeout);
         }
         this.readTimeout = readTimeout;
     }
-    
+
     /**
      * Get the user agent sent with every request.
      */
     public String getUserAgent() {
-        if (userAgent == null && DEFAULT_USER_AGENT == null) {
-            DEFAULT_USER_AGENT = getDefaultUserAgent(context);
+        if (userAgent == null) {
+            return DEFAULT_USER_AGENT;
         }
         return userAgent;
     }
-    
+
     /**
      * Set the user agent sent with every request.
      */
     public void setUserAgent(String userAgent) {
         this.userAgent = userAgent;
     }
-    
+
     Map<String, String> getInMemoryCookies() {
         return inMemoryCookies;
     }
-    
+
     /**
      * Get the default Http User Agent for this client.
      */
-    private static final String getDefaultUserAgent(Context context) {
-        String applicationVersion = null;
-        try {
-            applicationVersion = context.getPackageManager().getPackageInfo(
-                context.getPackageName(), 0).versionName;
-        } catch (NameNotFoundException e) {
-            applicationVersion = "0.0.0";
-        }
-        return "PixmobHttpClient" + "/" + applicationVersion + " ("
-                + Build.MANUFACTURER + " " + Build.MODEL + "; Android "
+    private static final String getDefaultUserAgent() {
+        return "PixmobHttpClient (" + Build.MANUFACTURER + " " + Build.MODEL + "; Android "
                 + Build.VERSION.RELEASE + "/" + Build.VERSION.SDK_INT + ")";
     }
 }
