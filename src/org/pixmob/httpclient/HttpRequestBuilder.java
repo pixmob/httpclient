@@ -308,7 +308,7 @@ public final class HttpRequestBuilder {
 
             if (isStatusCodeError(statusCode)) {
                 // Got an error: cannot read input.
-                payloadStream = new UncloseableInputStream();
+                payloadStream = new UncloseableInputStream(getErrorStream(conn));
             } else {
                 payloadStream = new UncloseableInputStream(getInputStream(conn));
             }
@@ -383,6 +383,27 @@ public final class HttpRequestBuilder {
                     }
                     if (contentEncoding.contains("deflate")) {
                         return new InflaterInputStream(conn.getInputStream(), new Inflater(true));
+                    }
+                }
+            }
+        }
+        return conn.getInputStream();
+    }
+
+    /**
+     * Open the error {@link InputStream} of an Http response. This method
+     * supports GZIP and DEFLATE responses.
+     */
+    private static InputStream getErrorStream(HttpURLConnection conn) throws IOException {
+        final List<String> contentEncodingValues = conn.getHeaderFields().get("Content-Encoding");
+        if (contentEncodingValues != null) {
+            for (final String contentEncoding : contentEncodingValues) {
+                if (contentEncoding != null) {
+                    if (contentEncoding.contains("gzip")) {
+                        return new GZIPInputStream(conn.getErrorStream());
+                    }
+                    if (contentEncoding.contains("deflate")) {
+                        return new InflaterInputStream(conn.getErrorStream(), new Inflater(true));
                     }
                 }
             }
