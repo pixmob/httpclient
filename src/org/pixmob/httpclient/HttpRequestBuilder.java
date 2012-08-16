@@ -180,7 +180,7 @@ public final class HttpRequestBuilder {
         return this;
     }
 
-    public void execute() throws HttpClientException {
+    public HttpResponse execute() throws HttpClientException {
         HttpURLConnection conn = null;
         UncloseableInputStream payloadStream = null;
         try {
@@ -312,19 +312,21 @@ public final class HttpRequestBuilder {
             } else {
                 payloadStream = new UncloseableInputStream(getInputStream(conn));
             }
+            final HttpResponse resp = new HttpResponse(statusCode, payloadStream,
+                    headerFields == null ? NO_HEADERS : headerFields, inMemoryCookies);
             if (handler != null) {
-                final HttpResponse resp = new HttpResponse(statusCode, payloadStream,
-                        headerFields == null ? NO_HEADERS : headerFields, inMemoryCookies);
                 try {
                     handler.onResponse(resp);
                 } catch (Exception e) {
                     throw new HttpClientException("Error in response handler", e);
                 }
             }
+            return resp;
         } catch (SocketTimeoutException e) {
             if (handler != null) {
                 try {
                     handler.onTimeout();
+                    return null;
                 } catch (Exception e2) {
                     throw new HttpClientException("Error in response handler", e2);
                 }
