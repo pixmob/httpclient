@@ -408,7 +408,7 @@ public final class HttpRequestBuilder {
                 }
             }
         }
-        return conn.getInputStream();
+        return conn.getErrorStream();
     }
 
     private static KeyStore loadCertificates(Context context) throws IOException {
