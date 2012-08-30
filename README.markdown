@@ -1,6 +1,6 @@
-Using HttpUrlConnection with Android 2.1+ devices
-=================================================
-Copyright (C) 2012 Pixmob (http://github.com/pixmob)
+A basic Http client for Android 2.1+ devices using HttpURLConnection 
+====================================================================
+Copyright (C) 2012 [Pixmob](https://plus.google.com/108697477633201807305/) (http://github.com/pixmob)
 
 Android provides two methods for making Http(s) requests:
 [HttpURLConnection](http://developer.android.com/reference/java/net/HttpURLConnection.html) and [Apache HttpClient](http://developer.android.com/reference/org/apache/http/impl/client/DefaultHttpClient.html).
@@ -29,7 +29,7 @@ Making Http requests with PHC is easy.
     HttpClient hc = new HttpClient();
     hc.get("http://www.google.com").execute();
 
-Downloading a file cannot be easier:
+Downloading a file is easy:
 
     File logoFile = new File(context.getCacheDir(), "logo.png");
     hc.get("http://www.mysite.com/logo.png").toFile(logoFile).execute();
@@ -46,6 +46,13 @@ You may want to send POST requests:
             }
         }
     ).execute();
+
+The same request with fewer lines:
+
+    final HttpResponse response = hc.post("http://www.mysite.com/query").setParameter("q", "hello").execute();
+    final StringBuilder buf = new StringBuilder(64);
+    response.read(buf);
+    System.out.println(buf);
 
 Please read JavaDoc and [source code](http://github.com/pixmob/httpclient/tree/master/src/org/pixmob/httpclient) for advanced use.
 
