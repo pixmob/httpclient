@@ -324,6 +324,8 @@ public final class HttpRequestBuilder {
                 } catch (Exception e) {
                     throw new HttpClientException("Error in response handler", e);
                 }
+            } else {
+                resp.preload();
             }
             return resp;
         } catch (SocketTimeoutException e) {

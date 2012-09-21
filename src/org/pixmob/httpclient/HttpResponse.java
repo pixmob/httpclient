@@ -15,6 +15,8 @@
  */
 package org.pixmob.httpclient;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -32,25 +34,22 @@ import android.os.Build;
  */
 public final class HttpResponse {
     private final int statusCode;
-    private final InputStream payload;
     private final Map<String, String> cookies;
     private final Map<String, List<String>> headers;
-    
-    HttpResponse(final int statusCode, final InputStream payload,
-            final Map<String, List<String>> rawHeaders,
+    private InputStream payload;
+
+    HttpResponse(final int statusCode, final InputStream payload, final Map<String, List<String>> rawHeaders,
             final Map<String, String> cookies) {
         this.statusCode = statusCode;
         this.payload = payload;
         this.cookies = Collections.unmodifiableMap(cookies);
-        
+
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.GINGERBREAD) {
             // Before Gingerbread, Android has a bug where all headers are
             // stored in lower-case:
             // http://code.google.com/p/android/issues/detail?id=6684
-            final Map<String, List<String>> newHeaders = new HashMap<String, List<String>>(
-                    rawHeaders.size());
-            for (final Map.Entry<String, List<String>> e : rawHeaders
-                    .entrySet()) {
+            final Map<String, List<String>> newHeaders = new HashMap<String, List<String>>(rawHeaders.size());
+            for (final Map.Entry<String, List<String>> e : rawHeaders.entrySet()) {
                 final String key = e.getKey();
                 final int keyLen = key.length();
                 final StringBuilder newKey = new StringBuilder(keyLen);
@@ -71,7 +70,7 @@ public final class HttpResponse {
             this.headers = Collections.unmodifiableMap(rawHeaders);
         }
     }
-    
+
     /**
      * Get the content type for this response, or <code>null</code> if unknown.
      */
@@ -80,11 +79,11 @@ public final class HttpResponse {
         if (contentType == null) {
             return null;
         }
-        
+
         final int i = contentType.indexOf(';');
         return i == -1 ? contentType : contentType.substring(0, i).trim();
     }
-    
+
     /**
      * Get the charset for this response, or <code>null</code> if unknown.
      */
@@ -93,24 +92,35 @@ public final class HttpResponse {
         if (contentType == null) {
             return null;
         }
-        
+
         final int i = contentType.indexOf('=');
-        return contentType.substring(i + 1).trim();
+        return i == -1 ? null : contentType.substring(i + 1).trim();
     }
-    
+
     /**
      * Get the response payload.
      */
     public InputStream getPayload() {
         return payload;
     }
-    
+
+    void preload() throws IOException {
+        final ByteArrayOutputStream outBuf = new ByteArrayOutputStream(2048);
+        final byte[] inBuf = new byte[1024];
+        final InputStream input = getPayload();
+        for (int bytesRead = 0; (bytesRead = input.read(inBuf)) != -1;) {
+            outBuf.write(inBuf, 0, bytesRead);
+        }
+
+        payload = new ByteArrayInputStream(outBuf.toByteArray());
+    }
+
     public void read(StringBuilder buffer) throws IOException {
         String enc = getContentCharset();
         if (enc == null) {
             enc = "UTF-8";
         }
-        
+
         final InputStream input = getPayload();
         final InputStreamReader reader = new InputStreamReader(input, enc);
         final char[] inBuf = new char[64];
@@ -118,21 +128,21 @@ public final class HttpResponse {
             buffer.append(inBuf, 0, charsRead);
         }
     }
-    
+
     /**
      * Get the response status code.
      */
     public int getStatusCode() {
         return statusCode;
     }
-    
+
     /**
      * Get the response headers.
      */
     public Map<String, List<String>> getHeaders() {
         return headers;
     }
-    
+
     /**
      * Get the first header value, or <code>null</code> if unset.
      */
@@ -143,7 +153,7 @@ public final class HttpResponse {
         }
         return values.get(0);
     }
-    
+
     /**
      * Get the response cookies.
      */
