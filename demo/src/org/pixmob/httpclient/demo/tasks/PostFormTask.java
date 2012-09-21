@@ -37,7 +37,7 @@ public class PostFormTask extends Task {
     protected void doRun() throws Exception {
         final HttpClient hc = createClient();
         hc.post("http://groovyconsole.appspot.com/executor.groovy")
-                .setParameter("script", "printf 'Hello Android!'").setHandler(new HttpResponseHandler() {
+                .param("script", "printf 'Hello Android!'").to(new HttpResponseHandler() {
                     @Override
                     public void onResponse(HttpResponse response) throws Exception {
                         final StringBuilder rawJson = new StringBuilder(64);

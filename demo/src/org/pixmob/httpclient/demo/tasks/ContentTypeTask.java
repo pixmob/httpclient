@@ -35,9 +35,9 @@ public class ContentTypeTask extends Task {
     @Override
     protected void doRun() throws Exception {
         final HttpClient hc = createClient();
-        hc.get("http://www.wired.com/").setHandler(new CheckContentHandler("text/html", "UTF-8")).execute();
+        hc.get("http://www.wired.com/").to(new CheckContentHandler("text/html", "UTF-8")).execute();
         hc.head("http://www.google.com/intl/en_com/images/srpr/logo3w.png")
-                .setHandler(new CheckContentHandler("image/png", null)).execute();
+                .to(new CheckContentHandler("image/png", null)).execute();
     }
 
     /**

@@ -40,7 +40,7 @@ public class HttpsTask extends Task {
         final HttpClient hc = createClient();
         for (final String url : httpsUrls) {
             hc.get(url)
-                    .expectStatusCode(HttpURLConnection.HTTP_OK, HttpURLConnection.HTTP_MOVED_TEMP,
+                    .expect(HttpURLConnection.HTTP_OK, HttpURLConnection.HTTP_MOVED_TEMP,
                             HttpURLConnection.HTTP_MOVED_PERM).execute();
         }
     }

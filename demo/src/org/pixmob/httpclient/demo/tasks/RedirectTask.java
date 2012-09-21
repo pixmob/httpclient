@@ -19,7 +19,6 @@ import java.net.HttpURLConnection;
 
 import org.pixmob.httpclient.HttpClient;
 import org.pixmob.httpclient.HttpResponse;
-import org.pixmob.httpclient.HttpResponseHandler;
 import org.pixmob.httpclient.demo.R;
 import org.pixmob.httpclient.demo.Task;
 
@@ -37,13 +36,9 @@ public class RedirectTask extends Task {
     @Override
     protected void doRun() throws Exception {
         final HttpClient hc = createClient();
-        hc.get("http://google.com").expectStatusCode(HttpURLConnection.HTTP_MOVED_PERM)
-                .setHandler(new HttpResponseHandler() {
-                    @Override
-                    public void onResponse(HttpResponse response) throws Exception {
-                        assertEquals("text/html", response.getContentType());
-                        assertEquals("UTF-8", response.getContentCharset());
-                    }
-                }).execute();
+        final HttpResponse response = hc.get("http://google.com").expect(HttpURLConnection.HTTP_MOVED_PERM)
+                .execute();
+        assertEquals("text/html", response.getContentType());
+        assertEquals("UTF-8", response.getContentCharset());
     }
 }

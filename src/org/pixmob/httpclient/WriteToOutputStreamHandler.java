@@ -15,41 +15,37 @@
  */
 package org.pixmob.httpclient;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 
 /**
- * {@link HttpResponseHandler} implementation for writing the response to a
- * file.
+ * {@link HttpResponseHandler} implementation for writing the response to an
+ * {@link OutputStream} instance.
  * @author Pixmob
  */
-class WriteToFileHandler extends HttpResponseHandler {
-    private final File file;
-    
-    public WriteToFileHandler(final File file) {
-        if (file == null) {
-            throw new IllegalArgumentException("File cannot be null");
+class WriteToOutputStreamHandler extends HttpResponseHandler {
+    private final OutputStream out;
+
+    public WriteToOutputStreamHandler(final OutputStream out) {
+        if (out == null) {
+            throw new IllegalArgumentException("Output stream cannot be null");
         }
-        this.file = file;
+        this.out = out;
     }
-    
+
     @Override
     public void onResponse(HttpResponse response) throws HttpClientException {
         InputStream in = null;
-        FileOutputStream out = null;
         try {
-            out = new FileOutputStream(file);
             in = response.getPayload();
-            
+
             final byte[] buf = new byte[1024];
             for (int bytesRead = 0; (bytesRead = in.read(buf)) != -1;) {
                 out.write(buf, 0, bytesRead);
             }
         } catch (IOException e) {
-            throw new HttpClientException(
-                    "Cannot write Http response to file: " + file.getPath(), e);
+            throw new HttpClientException("Cannot write Http response to output stream", e);
         } finally {
             IOUtils.close(out);
         }

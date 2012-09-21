@@ -39,7 +39,7 @@ public class DownloadFileTask extends Task {
         imgFile.delete();
 
         final HttpClient hc = createClient();
-        hc.get("http://www.google.fr/images/srpr/logo3w.png").toFile(imgFile).execute();
+        hc.get("http://www.google.fr/images/srpr/logo3w.png").to(imgFile).execute();
 
         if (!imgFile.exists() || imgFile.length() == 0) {
             throw new TaskExecutionFailedException("File download failed");

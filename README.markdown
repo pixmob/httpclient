@@ -32,13 +32,13 @@ Making Http requests with PHC is easy.
 Downloading a file is easy:
 
     File logoFile = new File(context.getCacheDir(), "logo.png");
-    hc.get("http://www.mysite.com/logo.png").toFile(logoFile).execute();
+    hc.get("http://www.mysite.com/logo.png").to(logoFile).execute();
 
 You may want to send POST requests:
 
     // the response buffer is reusable across requests (GC friendly)
     final StringBuilder buf = new StringBuilder(64);
-    hc.post("http://www.mysite.com/query").setParameter("q", "hello").setHandler(
+    hc.post("http://www.mysite.com/query").param("q", "hello").to(
         new HttpResponseHandler() {
             public void onResponse(HttpResponse response) throws Exception {
                 response.read(buf);
@@ -49,7 +49,7 @@ You may want to send POST requests:
 
 The same request with fewer lines:
 
-    final HttpResponse response = hc.post("http://www.mysite.com/query").setParameter("q", "hello").execute();
+    final HttpResponse response = hc.post("http://www.mysite.com/query").param("q", "hello").execute();
     final StringBuilder buf = new StringBuilder(64);
     response.read(buf);
     System.out.println(buf);
