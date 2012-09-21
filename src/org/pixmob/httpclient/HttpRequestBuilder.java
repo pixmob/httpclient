@@ -98,14 +98,12 @@ public final class HttpRequestBuilder {
         return this;
     }
 
-    public HttpRequestBuilder contentType(String contentType) {
-        this.contentType = contentType;
-        return this;
-    }
-
-    public HttpRequestBuilder content(byte[] content) {
+    public HttpRequestBuilder content(byte[] content, String contentType) {
         this.content = content;
-        contentSet = true;
+        this.contentType = contentType;
+        if (content != null) {
+            contentSet = true;
+        }
         return this;
     }
 
