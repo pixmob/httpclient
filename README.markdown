@@ -15,6 +15,7 @@ However, using HttpURLConnection on earlier Android devices (before ICS) is trou
  4. [headers in lower-case](http://code.google.com/p/android/issues/detail?id=6684)
  5. [incomplete read](http://docs.oracle.com/javase/6/docs/technotes/guides/net/http-keepalive.html)
  6. [transparent Gzip compression](http://code.google.com/p/android/issues/detail?id=16227)
+ 7. [broken Http authentication](http://code.google.com/p/android/issues/detail?id=9579)
 
 The framework Pixmob HttpClient (PHC) provides a clean interface to HttpURLConnection, with
 workarounds for known bugs, from Android 2.1 to Android 4.0.
@@ -54,9 +55,15 @@ The same request with fewer lines:
     response.read(buf);
     System.out.println(buf);
 
+Send an authenticated request (using Http Basic Authentication) this way:
+
+    // reuse the same authenticator instance across requests
+    final HttpBasicAuthenticator auth = new HttpBasicAuthenticator("admin", "secret");
+    hc.delete("https://www.mysite.com/item/12").with(auth).execute();
+
 Please read JavaDoc and [source code](http://github.com/pixmob/httpclient/tree/master/src/org/pixmob/httpclient) for advanced use.
 
-A sample application (with source code) is available in this repository.
+A sample application (with [source code](http://github.com/pixmob/httpclient/tree/master/demo/src/org/pixmob/httpclient/demo)) is available in this repository.
 
 License
 -------

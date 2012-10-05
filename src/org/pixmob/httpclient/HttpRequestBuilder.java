@@ -69,6 +69,7 @@ public final class HttpRequestBuilder {
     private static TrustManager[] trustManagers;
     private final byte[] buffer = new byte[1024];
     private final HttpClient hc;
+    private final List<HttpRequestHandler> reqHandlers = new ArrayList<HttpRequestHandler>(2);
     private String uri;
     private String method;
     private Set<Integer> expectedStatusCodes = new HashSet<Integer>(2);
@@ -84,6 +85,13 @@ public final class HttpRequestBuilder {
         this.hc = hc;
         this.uri = uri;
         this.method = method;
+    }
+
+    public HttpRequestBuilder with(HttpRequestHandler handler) {
+        if (handler != null) {
+            reqHandlers.add(handler);
+        }
+        return this;
     }
 
     public HttpRequestBuilder expect(int... statusCodes) {
@@ -279,6 +287,14 @@ public final class HttpRequestBuilder {
                     out.flush();
                 } else {
                     conn.setFixedLengthStreamingMode(0);
+                }
+            }
+
+            for (final HttpRequestHandler connHandler : reqHandlers) {
+                try {
+                    connHandler.onRequest(conn);
+                } catch (Exception e) {
+                    throw new HttpClientException("Failed to prepare request to " + uri, e);
                 }
             }
 
