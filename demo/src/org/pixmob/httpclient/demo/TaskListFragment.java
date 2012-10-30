@@ -22,13 +22,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.pixmob.httpclient.UserInteractionRequiredException;
 import org.pixmob.httpclient.demo.TaskListFragment.TaskContext;
 import org.pixmob.httpclient.demo.tasks.ContentTypeTask;
 import org.pixmob.httpclient.demo.tasks.DownloadFileTask;
+import org.pixmob.httpclient.demo.tasks.GoogleAppEngineAuthTask;
 import org.pixmob.httpclient.demo.tasks.HttpsTask;
 import org.pixmob.httpclient.demo.tasks.PostFormTask;
 import org.pixmob.httpclient.demo.tasks.RedirectTask;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
@@ -46,6 +49,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.actionbarsherlock.app.SherlockListFragment;
 import com.actionbarsherlock.view.Menu;
@@ -57,23 +61,28 @@ import com.actionbarsherlock.view.MenuItem;
  * @author Pixmob
  */
 public class TaskListFragment extends SherlockListFragment implements LoaderCallbacks<TaskContext> {
+    private static final int USER_INTERACTION_REQUEST = 1337;
     private TaskContext[] taskContexts;
     private TaskContextAdapter taskContextAdapter;
     private MenuItem startMenuItem;
-    private volatile boolean abortDemo;
 
     @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
 
         final Context context = getActivity().getApplicationContext();
         taskContexts = new TaskContext[] { new TaskContext(new DownloadFileTask(context)),
                 new TaskContext(new RedirectTask(context)), new TaskContext(new PostFormTask(context)),
-                new TaskContext(new ContentTypeTask(context)), new TaskContext(new HttpsTask(context)), };
+                new TaskContext(new ContentTypeTask(context)), new TaskContext(new HttpsTask(context)),
+                new TaskContext(new GoogleAppEngineAuthTask(context)) };
         taskContextAdapter = new TaskContextAdapter(getActivity(), taskContexts);
         setListAdapter(taskContextAdapter);
+    }
 
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
         if (savedInstanceState != null) {
             @SuppressWarnings("unchecked")
             final List<TaskState> states = (List<TaskState>) savedInstanceState.getSerializable("taskStates");
@@ -90,13 +99,32 @@ public class TaskListFragment extends SherlockListFragment implements LoaderCall
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putBoolean("abortDemo", abortDemo);
 
         final ArrayList<TaskState> states = new ArrayList<TaskListFragment.TaskState>(taskContexts.length);
         for (int i = 0; i < taskContexts.length; ++i) {
             states.add(taskContexts[i].state);
         }
         outState.putSerializable("taskStates", states);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (USER_INTERACTION_REQUEST == requestCode) {
+            final boolean authPermOK = resultCode == Activity.RESULT_OK;
+            Log.i(TAG, "Did user grant permission for authentication? " + (authPermOK ? "YES" : "NO"));
+
+            if (authPermOK) {
+                Toast.makeText(getActivity(), getString(R.string.access_granted), Toast.LENGTH_SHORT).show();
+                // Restart authentication.
+                for (int i = 0; i < taskContexts.length; ++i) {
+                    if (taskContexts[i].task instanceof GoogleAppEngineAuthTask) {
+                        getLoaderManager().restartLoader(i, null, this);
+                        break;
+                    }
+                }
+            }
+        }
     }
 
     @Override
@@ -112,20 +140,6 @@ public class TaskListFragment extends SherlockListFragment implements LoaderCall
         }
     }
 
-    /**
-     * Check if any task is running.
-     */
-    private boolean isDemoRunning() {
-        if (taskContexts != null) {
-            for (final TaskContext taskContext : taskContexts) {
-                if (TaskState.RUNNING.equals(taskContext.state)) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
@@ -133,12 +147,6 @@ public class TaskListFragment extends SherlockListFragment implements LoaderCall
         startMenuItem = menu.add(Menu.NONE, R.string.menu_start_demo, Menu.NONE, R.string.menu_start_demo);
         startMenuItem.setIcon(R.drawable.ic_menu_play_clip).setShowAsAction(
                 MenuItem.SHOW_AS_ACTION_IF_ROOM | MenuItem.SHOW_AS_ACTION_WITH_TEXT);
-
-        if (isDemoRunning()) {
-            startMenuItem.setTitle(R.string.menu_stop_demo);
-            startMenuItem.setIcon(R.drawable.ic_menu_stop);
-        }
-
         menu.add(Menu.NONE, R.string.menu_help, Menu.NONE, R.string.menu_help)
                 .setIcon(R.drawable.ic_menu_help)
                 .setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM | MenuItem.SHOW_AS_ACTION_WITH_TEXT);
@@ -160,19 +168,14 @@ public class TaskListFragment extends SherlockListFragment implements LoaderCall
     }
 
     private void onMenuStart() {
-        if (getLoaderManager().hasRunningLoaders()) {
-            abortDemo = true;
-        } else {
-            abortDemo = false;
-            startMenuItem.setTitle(R.string.menu_stop_demo);
-            startMenuItem.setIcon(R.drawable.ic_menu_stop);
+        startMenuItem.setTitle(R.string.menu_stop_demo);
+        startMenuItem.setIcon(R.drawable.ic_menu_stop);
 
-            for (final TaskContext taskContext : taskContexts) {
-                taskContext.state = TaskState.RUNNABLE;
-            }
-
-            getLoaderManager().restartLoader(0, null, this);
+        for (final TaskContext taskContext : taskContexts) {
+            taskContext.reset();
         }
+
+        getLoaderManager().restartLoader(0, null, this);
     }
 
     private void onMenuHelp() {
@@ -197,12 +200,18 @@ public class TaskListFragment extends SherlockListFragment implements LoaderCall
         taskContextAdapter.notifyDataSetChanged();
 
         final int nextId = loader.getId() + 1;
-        if (!abortDemo && nextId != taskContexts.length) {
+        if (nextId < taskContexts.length) {
             getLoaderManager().restartLoader(nextId, null, this);
         } else {
-            abortDemo = false;
             startMenuItem.setTitle(R.string.menu_start_demo);
             startMenuItem.setIcon(R.drawable.ic_menu_play_clip);
+
+            for (final TaskContext taskContext : taskContexts) {
+                if (taskContext.userIntent != null) {
+                    startActivityForResult(taskContext.userIntent, USER_INTERACTION_REQUEST);
+                    break;
+                }
+            }
         }
     }
 
@@ -221,7 +230,9 @@ public class TaskListFragment extends SherlockListFragment implements LoaderCall
         @Override
         protected void onStartLoading() {
             super.onStartLoading();
-            forceLoad();
+            if (TaskState.RUNNING.equals(taskContext.state)) {
+                forceLoad();
+            }
         }
 
         @Override
@@ -234,6 +245,13 @@ public class TaskListFragment extends SherlockListFragment implements LoaderCall
                 Log.i(TAG, "Task successfully executed: " + taskName);
             } catch (TaskExecutionFailedException e) {
                 taskContext.state = TaskState.FAILED;
+
+                final Throwable cause = e.getCause();
+                if (cause != null && cause instanceof UserInteractionRequiredException) {
+                    final UserInteractionRequiredException e2 = (UserInteractionRequiredException) cause;
+                    taskContext.userIntent = e2.getUserIntent();
+                }
+
                 Log.e(TAG, "Task execution failed: " + taskName, e);
             }
 
@@ -296,10 +314,17 @@ public class TaskListFragment extends SherlockListFragment implements LoaderCall
      */
     public static class TaskContext {
         public final Task task;
-        public volatile TaskState state = TaskState.RUNNABLE;
+        public TaskState state;
+        public Intent userIntent;
 
         public TaskContext(final Task task) {
             this.task = task;
+            reset();
+        }
+
+        public void reset() {
+            state = TaskState.RUNNABLE;
+            userIntent = null;
         }
     }
 

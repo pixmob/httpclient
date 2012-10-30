@@ -61,6 +61,19 @@ Send an authenticated request (using Http Basic Authentication) this way:
     final HttpBasicAuthenticator auth = new HttpBasicAuthenticator("admin", "secret");
     hc.delete("https://www.mysite.com/item/12").with(auth).execute();
 
+Google AppEngine authentication is supported as well:
+
+    final String gaeHost = "myapp.appspot.com";
+    final GoogleAppEngineAuthenticator auth = new GoogleAppEngineAuthenticator(context, account, gaeHost);
+    try {
+        hc.get("http://" + gaeHost).with(auth).execute();
+    } catch(UserInteractionRequiredException e) {
+        // user authorization is required:
+        // open system activity for granting access to user credentials
+        // (user password is never stored nor known by this library)
+        context.startActivityForResult(e.getUserIntent(), USER_AUTH);
+    }
+
 Please read JavaDoc and [source code](http://github.com/pixmob/httpclient/tree/master/src/org/pixmob/httpclient) for advanced use.
 
 A sample application (with [source code](http://github.com/pixmob/httpclient/tree/master/demo/src/org/pixmob/httpclient/demo)) is available in this repository.

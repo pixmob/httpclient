@@ -23,8 +23,8 @@ final class Constants {
     /**
      * Logging tag.
      */
-    public static final String TAG = "HCL/Demo";
-    
+    public static final String TAG = "Pixmob HttpClient Demo";
+
     private Constants() {
     }
 }

@@ -17,12 +17,13 @@
     <TextView
         android:id="@+id/task_name"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="?android:attr/listPreferredItemHeight"
         android:layout_alignParentLeft="true"
         android:layout_centerVertical="true"
         android:layout_toLeftOf="@id/task_progress"
-        android:drawableLeft="@drawable/task"
-        android:padding="4dip"
+        android:gravity="center_vertical"
+        android:paddingLeft="8dip"
+        android:paddingRight="8dip"
         android:text="Task Name"
         android:textAppearance="?android:attr/textAppearanceLarge" />
 

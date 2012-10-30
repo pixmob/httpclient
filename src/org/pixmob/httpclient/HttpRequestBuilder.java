@@ -293,6 +293,8 @@ public final class HttpRequestBuilder {
             for (final HttpRequestHandler connHandler : reqHandlers) {
                 try {
                     connHandler.onRequest(conn);
+                } catch (HttpClientException e) {
+                    throw e;
                 } catch (Exception e) {
                     throw new HttpClientException("Failed to prepare request to " + uri, e);
                 }
@@ -337,6 +339,8 @@ public final class HttpRequestBuilder {
             if (handler != null) {
                 try {
                     handler.onResponse(resp);
+                } catch (HttpClientException e) {
+                    throw e;
                 } catch (Exception e) {
                     throw new HttpClientException("Error in response handler", e);
                 }
@@ -349,6 +353,8 @@ public final class HttpRequestBuilder {
                 try {
                     handler.onTimeout();
                     return null;
+                } catch (HttpClientException e2) {
+                    throw e2;
                 } catch (Exception e2) {
                     throw new HttpClientException("Error in response handler", e2);
                 }
