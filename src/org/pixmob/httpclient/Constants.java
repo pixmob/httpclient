@@ -23,7 +23,7 @@ final class Constants {
     /**
      * Logging tag.
      */
-    public static final String TAG = "HttpClientLibrary";
+    public static final String TAG = "PixmobHttpClient";
     
     /**
      * <code>GET</code> Http method.
