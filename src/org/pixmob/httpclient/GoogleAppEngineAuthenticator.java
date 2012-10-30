@@ -15,7 +15,6 @@
  */
 package org.pixmob.httpclient;
 
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URLEncoder;
@@ -23,14 +22,7 @@ import java.util.Map;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
-import android.accounts.AccountManagerFuture;
-import android.accounts.AuthenticatorException;
-import android.accounts.OperationCanceledException;
-import android.annotation.TargetApi;
 import android.content.Context;
-import android.content.Intent;
-import android.os.Build;
-import android.os.Bundle;
 
 /**
  * This {@link HttpRequestHandler} implementation authenticates requests to a
@@ -41,10 +33,8 @@ import android.os.Bundle;
  * </p>
  * @author Pixmob
  */
-public class GoogleAppEngineAuthenticator extends HttpRequestHandler {
+public class GoogleAppEngineAuthenticator extends AbstractAccountAuthenticator {
     public static final String GOOGLE_ACCOUNT_TYPE = "com.google";
-    private final Context context;
-    private final Account account;
     private final String gaeHost;
     private String authCookieValue;
 
@@ -58,65 +48,15 @@ public class GoogleAppEngineAuthenticator extends HttpRequestHandler {
      *            Google App Engine hostname, such as <tt>myapp.appspot.com</tt>
      */
     public GoogleAppEngineAuthenticator(final Context context, final Account account, final String gaeHost) {
-        if (context == null) {
-            throw new IllegalArgumentException("Context is required");
-        }
-        if (account == null) {
-            throw new IllegalArgumentException("Account is required");
-        }
+        super(context, account);
         if (gaeHost == null) {
             throw new IllegalArgumentException("Google App Engine host is required");
         }
-        this.context = context;
-        this.account = account;
         this.gaeHost = gaeHost;
     }
 
-    private String generateAuthToken() throws HttpClientException {
-        // Get an authentication token from the AccountManager:
-        // this call is asynchronous, as the user may not respond immediately.
-        final AccountManager am = (AccountManager) context.getSystemService(Context.ACCOUNT_SERVICE);
-        final AccountManagerFuture<Bundle> authResultFuture;
-
-        // The AccountManager API for authentication token is different before
-        // Ice Cream Sandwich.
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
-            authResultFuture = GetTokenLegacy.INSTANCE.get(am, account);
-        } else {
-            authResultFuture = GetTokenICS.INSTANCE.get(am, account);
-        }
-
-        final Bundle authResult;
-        try {
-            authResult = authResultFuture.getResult();
-        } catch (OperationCanceledException e) {
-            throw new HttpClientException("Authentication failed: canceled by user", e);
-        } catch (AuthenticatorException e) {
-            throw new HttpClientException("Authentication failed", e);
-        } catch (IOException e) {
-            throw new HttpClientException("Authentication failed: network error", e);
-        }
-        if (authResult == null) {
-            throw new HttpClientException("Authentication failed");
-        }
-
-        final String authToken = authResult.getString(AccountManager.KEY_AUTHTOKEN);
-        if (authToken == null) {
-            // No authentication token found:
-            // the user must allow this application to use his account.
-            final Intent authPermIntent = (Intent) authResult.get(AccountManager.KEY_INTENT);
-            int flags = authPermIntent.getFlags();
-            flags &= ~Intent.FLAG_ACTIVITY_NEW_TASK;
-            authPermIntent.setFlags(flags);
-
-            // The request is aborted: the application should retry later.
-            throw new UserInteractionRequiredException(authPermIntent);
-        }
-        return authToken;
-    }
-
     private String fetchAuthCookie(String authToken, boolean invalidateToken) throws HttpClientException {
-        final AccountManager am = (AccountManager) context.getSystemService(Context.ACCOUNT_SERVICE);
+        final AccountManager am = (AccountManager) getContext().getSystemService(Context.ACCOUNT_SERVICE);
         if (invalidateToken) {
             // Invalidate authentication token, and generate a new one.
             am.invalidateAuthToken(GOOGLE_ACCOUNT_TYPE, authToken);
@@ -125,7 +65,7 @@ public class GoogleAppEngineAuthenticator extends HttpRequestHandler {
 
         final String loginUrl = "https://" + gaeHost + "/_ah/login?continue=http://localhost/&auth="
                 + urlEncode(authToken);
-        final HttpClient hc = new HttpClient(context);
+        final HttpClient hc = new HttpClient(getContext());
         final HttpResponse resp;
         try {
             resp = hc.get(loginUrl).expect(HttpURLConnection.HTTP_MOVED_TEMP).execute();
@@ -173,23 +113,5 @@ public class GoogleAppEngineAuthenticator extends HttpRequestHandler {
         // prevent security issues.
 
         conn.addRequestProperty("Cookie", authCookieValue);
-    }
-
-    private static class GetTokenLegacy {
-        public static final GetTokenLegacy INSTANCE = new GetTokenLegacy();
-
-        @SuppressWarnings("deprecation")
-        public AccountManagerFuture<Bundle> get(AccountManager am, Account account) {
-            return am.getAuthToken(account, "ah", false, null, null);
-        }
-    }
-
-    private static class GetTokenICS {
-        public static final GetTokenICS INSTANCE = new GetTokenICS();
-
-        @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
-        public AccountManagerFuture<Bundle> get(AccountManager am, Account account) {
-            return am.getAuthToken(account, "ah", null, false, null, null);
-        }
     }
 }
