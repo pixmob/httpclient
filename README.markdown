@@ -25,12 +25,12 @@ Using PHC will make your code easier to understand, while leveraging the Android
 Usage
 -----
 
-Making Http requests with PHC is easy.
+Making Http requests is easy:
 
     HttpClient hc = new HttpClient();
     hc.get("http://www.google.com").execute();
 
-Downloading a file is easy:
+Downloading a file is obvious:
 
     File logoFile = new File(context.getCacheDir(), "logo.png");
     hc.get("http://www.mysite.com/logo.png").to(logoFile).execute();
@@ -61,7 +61,7 @@ Send an authenticated request (using Http Basic Authentication) this way:
     final HttpBasicAuthenticator auth = new HttpBasicAuthenticator("admin", "secret");
     hc.delete("https://www.mysite.com/item/12").with(auth).execute();
 
-Google AppEngine authentication is supported as well:
+Google App Engine authentication is supported as well:
 
     final String gaeHost = "myapp.appspot.com";
     final GoogleAppEngineAuthenticator auth = new GoogleAppEngineAuthenticator(context, account, gaeHost);
@@ -74,9 +74,13 @@ Google AppEngine authentication is supported as well:
         context.startActivityForResult(e.getUserIntent(), USER_AUTH);
     }
 
+Use the [AbstractAccountAuthenticator](https://github.com/pixmob/httpclient/blob/master/src/org/pixmob/httpclient/AbstractAccountAuthenticator.java) class to create new authenticators using the AccountManager API from Android, without asking for the user password.
+
+Pixmob HttpClient is not thread safe: create a HttpClient instance when you need to make network requests. Network resources are automatically freed by the framework.
+
 Please read JavaDoc and [source code](http://github.com/pixmob/httpclient/tree/master/src/org/pixmob/httpclient) for advanced use.
 
-A sample application (with [source code](http://github.com/pixmob/httpclient/tree/master/demo/src/org/pixmob/httpclient/demo)) is available in this repository.
+A sample application (with [source code](http://github.com/pixmob/httpclient/tree/master/demo/src/org/pixmob/httpclient/demo)) is available in this repository. [Get this app](https://play.google.com/store/apps/details?id=org.pixmob.httpclient.demo) on Google Play!
 
 License
 -------
