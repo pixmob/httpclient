@@ -15,8 +15,9 @@
  */
 package org.pixmob.httpclient;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -104,15 +105,15 @@ public final class HttpResponse {
         return payload;
     }
 
-    void preload() throws IOException {
-        final ByteArrayOutputStream outBuf = new ByteArrayOutputStream(2048);
+    void preload(File temp) throws IOException {
+        final FileOutputStream out = new FileOutputStream(temp);
         final byte[] inBuf = new byte[1024];
-        final InputStream input = getPayload();
-        for (int bytesRead = 0; (bytesRead = input.read(inBuf)) != -1;) {
-            outBuf.write(inBuf, 0, bytesRead);
+        final InputStream in = getPayload();
+        for (int bytesRead = 0; (bytesRead = in.read(inBuf)) != -1;) {
+            out.write(inBuf, 0, bytesRead);
         }
 
-        payload = new ByteArrayInputStream(outBuf.toByteArray());
+        payload = new FileInputStream(temp);
     }
 
     public void read(StringBuilder buffer) throws IOException {

@@ -47,5 +47,12 @@ public class PostFormTask extends Task {
                         assertEquals("Hello Android!", json.getString("outputText"));
                     }
                 }).execute();
+
+        final HttpResponse resp = hc.post("http://groovyconsole.appspot.com/executor.groovy")
+        .param("script", "printf 'Hello Android! (inline)'").execute();
+        final StringBuilder rawJson = new StringBuilder(64);
+        resp.read(rawJson);
+        final JSONObject json = new JSONObject(rawJson.toString());
+        assertEquals("Hello Android! (inline)", json.getString("outputText"));
     }
 }

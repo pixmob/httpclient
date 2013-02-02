@@ -345,7 +345,9 @@ public final class HttpRequestBuilder {
                     throw new HttpClientException("Error in response handler", e);
                 }
             } else {
-                resp.preload();
+                final File temp = File.createTempFile("httpclient-req-", ".cache", hc.getContext().getCacheDir());
+                resp.preload(temp);
+                temp.delete();
             }
             return resp;
         } catch (SocketTimeoutException e) {
