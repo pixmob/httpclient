@@ -77,7 +77,7 @@ public abstract class AbstractAccountAuthenticator extends HttpRequestHandler {
      *             if authentication failed (network error, bad credentials,
      *             etc...)
      */
-    protected final String generateAuthToken() throws HttpClientException {
+    protected final String generateAuthToken(String authTokenType) throws HttpClientException {
         // Get an authentication token from the AccountManager:
         // this call is asynchronous, as the user may not respond immediately.
         final AccountManager am = (AccountManager) context.getSystemService(Context.ACCOUNT_SERVICE);
@@ -86,9 +86,9 @@ public abstract class AbstractAccountAuthenticator extends HttpRequestHandler {
         // The AccountManager API for authentication token is different before
         // Ice Cream Sandwich.
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
-            authResultFuture = GetTokenLegacy.INSTANCE.get(am, account);
+            authResultFuture = GetTokenLegacy.INSTANCE.get(am, account, authTokenType);
         } else {
-            authResultFuture = GetTokenICS.INSTANCE.get(am, account);
+            authResultFuture = GetTokenICS.INSTANCE.get(am, account, authTokenType);
         }
 
         final Bundle authResult;
@@ -124,8 +124,8 @@ public abstract class AbstractAccountAuthenticator extends HttpRequestHandler {
         public static final GetTokenLegacy INSTANCE = new GetTokenLegacy();
 
         @SuppressWarnings("deprecation")
-        public AccountManagerFuture<Bundle> get(AccountManager am, Account account) {
-            return am.getAuthToken(account, "ah", false, null, null);
+        public AccountManagerFuture<Bundle> get(AccountManager am, Account account, String authTokenType) {
+            return am.getAuthToken(account, authTokenType, false, null, null);
         }
     }
 
@@ -133,8 +133,8 @@ public abstract class AbstractAccountAuthenticator extends HttpRequestHandler {
         public static final GetTokenICS INSTANCE = new GetTokenICS();
 
         @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
-        public AccountManagerFuture<Bundle> get(AccountManager am, Account account) {
-            return am.getAuthToken(account, "ah", null, false, null, null);
+        public AccountManagerFuture<Bundle> get(AccountManager am, Account account, String authTokenType) {
+            return am.getAuthToken(account, authTokenType, null, false, null, null);
         }
     }
 }

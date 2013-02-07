@@ -101,6 +101,10 @@ public class GoogleAppEngineAuthenticator extends AbstractAccountAuthenticator {
         return encoded;
     }
 
+    private String generateAuthToken() throws HttpClientException {
+        return generateAuthToken("ah");
+    }
+
     @Override
     public void onRequest(HttpURLConnection conn) throws Exception {
         if (authCookieValue == null) {
