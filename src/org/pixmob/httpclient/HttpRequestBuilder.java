@@ -64,7 +64,6 @@ import android.os.Build;
  */
 public final class HttpRequestBuilder {
     private static final SecureRandom SECURE_RANDOM = new SecureRandom();
-    private static final String CONTENT_CHARSET = "UTF-8";
     private static final Map<String, List<String>> NO_HEADERS = new HashMap<String, List<String>>(0);
     private static TrustManager[] trustManagers;
     private final byte[] buffer = new byte[1024];
@@ -209,15 +208,15 @@ public final class HttpRequestBuilder {
                     }
                     final String name = e.getKey();
                     final String value = e.getValue();
-                    buf.append(URLEncoder.encode(name, CONTENT_CHARSET)).append("=")
-                            .append(URLEncoder.encode(value, CONTENT_CHARSET));
+                    buf.append(URLEncoder.encode(name, hc.getContentCharset())).append("=")
+                            .append(URLEncoder.encode(value, hc.getContentCharset()));
                     ++paramIdx;
                 }
 
                 if (!contentSet
                         && (HTTP_POST.equals(method) || HTTP_DELETE.equals(method) || HTTP_PUT.equals(method))) {
                     try {
-                        content = buf.toString().getBytes(CONTENT_CHARSET);
+                        content = buf.toString().getBytes(hc.getContentCharset());
                     } catch (UnsupportedEncodingException e) {
                         // Unlikely to happen.
                         throw new HttpClientException("Encoding error", e);
@@ -264,8 +263,8 @@ public final class HttpRequestBuilder {
             conn.setRequestProperty("Connection", "close");
             conn.setRequestProperty("Location", uri);
             conn.setRequestProperty("Referrer", uri);
-            conn.setRequestProperty("Accept-Encoding", "gzip,deflate");
-            conn.setRequestProperty("Accept-Charset", CONTENT_CHARSET);
+            conn.setRequestProperty("Accept-Encoding", hc.getAcceptedEncodings());
+            conn.setRequestProperty("Accept-Charset", hc.getContentCharset());
 
             if (conn instanceof HttpsURLConnection) {
                 setupSecureConnection(hc.getContext(), (HttpsURLConnection) conn);
@@ -276,7 +275,7 @@ public final class HttpRequestBuilder {
                     conn.setDoOutput(true);
                     if (!contentSet) {
                         conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded; charset="
-                                + CONTENT_CHARSET);
+                                + hc.getContentCharset());
                     } else if (contentType != null) {
                         conn.setRequestProperty("Content-Type", contentType);
                     }
@@ -316,7 +315,13 @@ public final class HttpRequestBuilder {
             final Map<String, List<String>> headerFields = conn.getHeaderFields();
             final Map<String, String> inMemoryCookies = hc.getInMemoryCookies();
             if (headerFields != null) {
-                final List<String> newCookies = headerFields.get("Set-Cookie");
+                List<String> newCookies = headerFields.get("Set-Cookie");
+                if (newCookies == null) {
+					// Malicious web servers may return lower case header fields
+					// and before Gingerbread HttpURLConnection does not correct
+					// these properly; instead parse "set-cookie" headers too.
+                	newCookies = headerFields.get("set-cookie");
+                }
                 if (newCookies != null) {
                     for (final String newCookie : newCookies) {
                         final String rawCookie = newCookie.split(";", 2)[0];

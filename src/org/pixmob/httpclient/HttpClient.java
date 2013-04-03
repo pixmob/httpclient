@@ -41,10 +41,14 @@ public final class HttpClient {
     }
 
     private static final String DEFAULT_USER_AGENT = getDefaultUserAgent();
+    private static final String DEFAULT_CONTENT_CHARSET = "UTF-8";
+    private static final String DEFAULT_ACCEPTED_ENCODINGS = "gzip,deflate";
     private final Context context;
     private int connectTimeout;
     private int readTimeout;
     private String userAgent;
+    private String contentCharset;
+    private String acceptedEncodings;
     private final Map<String, String> inMemoryCookies = new HashMap<String, String>(8);
 
     /**
@@ -160,6 +164,40 @@ public final class HttpClient {
      */
     public void setUserAgent(String userAgent) {
         this.userAgent = userAgent;
+    }
+
+    /**
+     * Get the accepted character set to encode content in with every request.
+     */
+    public String getContentCharset() {
+        if (contentCharset == null) {
+            return DEFAULT_CONTENT_CHARSET;
+        }
+        return contentCharset;
+    }
+
+    /**
+     * Set the accepted character set to encode content in with every request.
+     */
+    public void setContentCharset(String contentCharset) {
+        this.contentCharset = contentCharset;
+    }
+
+    /**
+     * Get the accepted encodings for every request.
+     */
+    public String getAcceptedEncodings() {
+        if (acceptedEncodings == null) {
+            return DEFAULT_ACCEPTED_ENCODINGS;
+        }
+        return acceptedEncodings;
+    }
+
+    /**
+     * Set the accepted encodings for every request.
+     */
+    public void setAcceptedEncodings(String acceptedEncodings) {
+        this.acceptedEncodings = acceptedEncodings;
     }
 
     Map<String, String> getInMemoryCookies() {
