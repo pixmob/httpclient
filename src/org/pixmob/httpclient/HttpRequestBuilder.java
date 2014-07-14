@@ -77,6 +77,7 @@ public final class HttpRequestBuilder {
     private Map<String, List<String>> headers;
     private Map<String, String> parameters;
     private byte[] content;
+    private String contentFilePath;
     private boolean contentSet;
     private String contentType;
     private HttpResponseHandler handler;
@@ -110,6 +111,15 @@ public final class HttpRequestBuilder {
         this.content = content;
         this.contentType = contentType;
         if (content != null) {
+            contentSet = true;
+        }
+        return this;
+    }
+
+    public HttpRequestBuilder contentFromFile(String filePath, String contentType) {
+        this.contentFilePath = filePath;
+        this.contentType = contentType;
+        if (contentFilePath != null) {
             contentSet = true;
         }
         return this;
@@ -192,6 +202,7 @@ public final class HttpRequestBuilder {
         return this;
     }
 
+    @TargetApi(19)
     public HttpResponse execute() throws HttpClientException {
         HttpURLConnection conn = null;
         UncloseableInputStream payloadStream = null;
@@ -285,7 +296,34 @@ public final class HttpRequestBuilder {
                     final OutputStream out = conn.getOutputStream();
                     out.write(content);
                     out.flush();
-                } else {
+                } else if (contentFilePath != null) {
+                    conn.setDoOutput(true);
+                    if (!contentSet) {
+                        conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded; charset="
+                                + CONTENT_CHARSET);
+                    } else if (contentType != null) {
+                        conn.setRequestProperty("Content-Type", contentType);
+                    }
+                    File file = new File(contentFilePath);
+                    if (file.exists() && !file.isDirectory()) {
+                        if (Build.VERSION.SDK_INT > 19) {
+                            conn.setFixedLengthStreamingMode(file.length());
+                        }
+                        else {
+                            conn.setFixedLengthStreamingMode((int) file.length());
+                        }
+
+                        FileInputStream fileInputStream = new FileInputStream(file);
+                        final OutputStream out = conn.getOutputStream();
+
+                        int len = 0;
+                        while ((len = fileInputStream.read(buffer)) != -1) {
+                            out.write(buffer, 0, len);
+                        }
+
+                        out.flush();
+                        fileInputStream.close();
+                    } else {
                     conn.setFixedLengthStreamingMode(0);
                 }
             }
