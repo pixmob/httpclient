@@ -116,6 +116,29 @@ public final class HttpResponse {
         payload = new FileInputStream(temp);
     }
 
+    public String getResponseBody() throws IOException {
+        String enc = getContentCharset();
+        if (enc == null) {
+            enc = "UTF-8";
+        }
+
+        InputStream input = getPayload();
+        InputStreamReader inputStreamReader = new InputStreamReader(input, enc);
+        BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+
+        StringBuilder stringBuilder = new StringBuilder();
+        String bufferedStrChunk = null;
+
+        while((bufferedStrChunk = bufferedReader.readLine()) != null){
+            stringBuilder.append(bufferedStrChunk);
+        }
+
+        if (bufferedReader != null) { bufferedReader.close(); }
+        if (inputStreamReader != null) { inputStreamReader.close(); }
+
+        return stringBuilder.toString();
+    }
+
     public void read(StringBuilder buffer) throws IOException {
         String enc = getContentCharset();
         if (enc == null) {
