@@ -21,6 +21,9 @@ import static org.pixmob.httpclient.Constants.HTTP_HEAD;
 import static org.pixmob.httpclient.Constants.HTTP_POST;
 import static org.pixmob.httpclient.Constants.HTTP_PUT;
 
+import android.os.AsyncTask;
+import android.os.Build;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -62,7 +65,7 @@ import android.os.Build;
  * This class is used to prepare and execute an Http request.
  * @author Pixmob
  */
-public final class HttpRequestBuilder {
+public final class HttpRequestBuilder  extends AsyncTask<Void, Integer, HttpResponse> {
     private static final SecureRandom SECURE_RANDOM = new SecureRandom();
     private static final String CONTENT_CHARSET = "UTF-8";
     private static final Map<String, List<String>> NO_HEADERS = new HashMap<String, List<String>>(0);
@@ -192,7 +195,7 @@ public final class HttpRequestBuilder {
         return this;
     }
 
-    public HttpResponse execute() throws HttpClientException {
+    public HttpResponse executeRequest() throws HttpClientException {
         HttpURLConnection conn = null;
         UncloseableInputStream payloadStream = null;
         try {
@@ -399,6 +402,16 @@ public final class HttpRequestBuilder {
         }
     }
 
+    @Override
+    protected HttpResponse doInBackground(Void... params) {
+        HttpResponse httpResponse = null;
+        try {
+            httpResponse = this.executeRequest();
+        } catch (HttpClientException e) {
+            e.printStackTrace();
+        }
+        return httpResponse;
+    }
     /**
      * Open the {@link InputStream} of an Http response. This method supports
      * GZIP and DEFLATE responses.
