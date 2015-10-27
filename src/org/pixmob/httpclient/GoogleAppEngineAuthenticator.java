@@ -68,8 +68,8 @@ public class GoogleAppEngineAuthenticator extends AbstractAccountAuthenticator {
         final HttpClient hc = new HttpClient(getContext());
         final HttpResponse resp;
         try {
-            resp = hc.get(loginUrl).expect(HttpURLConnection.HTTP_MOVED_TEMP).execute();
-        } catch (HttpClientException e) {
+            resp = hc.get(loginUrl).expect(HttpURLConnection.HTTP_MOVED_TEMP).execute().get();
+        } catch (Exception e) {
             throw new HttpClientException("Authentication failed", e);
         }
 
