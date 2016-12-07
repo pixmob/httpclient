@@ -45,6 +45,8 @@ public final class HttpClient {
     private int connectTimeout;
     private int readTimeout;
     private String userAgent;
+    private String user;
+    private String password;
     private final Map<String, String> inMemoryCookies = new HashMap<String, String>(8);
 
     /**
@@ -160,6 +162,22 @@ public final class HttpClient {
      */
     public void setUserAgent(String userAgent) {
         this.userAgent = userAgent;
+    }
+
+    public String getUser() {
+        return user;
+    }
+
+    public void setUser(String user) {
+        this.user = user;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     Map<String, String> getInMemoryCookies() {

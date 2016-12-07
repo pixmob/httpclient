@@ -53,6 +53,8 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 
+import com.os.osecm.osandroid.client.R;
+import com.os.osecm.osandroid.util.Base64;
 import org.apache.http.conn.ssl.BrowserCompatHostnameVerifier;
 
 import android.content.Context;
@@ -259,6 +261,12 @@ public final class HttpRequestBuilder {
             final String userAgent = hc.getUserAgent();
             if (userAgent != null) {
                 conn.setRequestProperty("User-Agent", userAgent);
+            }
+
+            if (hc.getUser() != null && hc.getPassword() != null) {
+                String up = hc.getUser() + ":" + hc.getPassword();
+                String encoded = Base64.encodeBytes(up.getBytes());
+                conn.setRequestProperty("Authorization", "Basic " + encoded);
             }
 
             conn.setRequestProperty("Connection", "close");
